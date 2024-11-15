@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* :root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) { */
+  :root {
+    --background: radial-gradient(circle, rgba(24,39,69,1) 8%, rgba(14,23,41,1) 99%, rgba(44,55,77,1) 100%);
+    --foreground: #ecf0f1;
+  }
+/* } */
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.tooltip {
+  visibility: hidden;
+}
+
+.relative:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.input-text {
+  color: black; /* or any other color */
+}
+
+.btn-primary {
+  @apply flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600;
+}
+
+.btn-secondary {
+  @apply bg-gray-500 text-white font-bold py-2 px-4 rounded;
+}
