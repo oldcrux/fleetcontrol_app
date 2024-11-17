@@ -46,6 +46,7 @@ export interface Vehicle {
   vehicleGroup: string;
   orgId: string,
   createdBy: string,
+  isActive: string,
 }
 
 export interface Shape{
