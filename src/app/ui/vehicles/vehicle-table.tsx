@@ -19,9 +19,11 @@ import {
   MRT_Row,
   DropdownOption,
   MRT_ActionMenuItem,
+  MRT_Cell
 } from "material-react-table";
 import {
   Box,
+  Checkbox,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -41,7 +43,8 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { Button } from "../button";
 import { geofenceGroups } from "@/app/lib/geofence-utils";
@@ -69,33 +72,23 @@ const Vehicles = () => {
   );
   const [globalFilter, setGlobalFilter] = useState<string>();
   const [sorting, setSorting] = useState<MRT_SortingState>([]);
-  // const [creating, setCreating] = useState(true);
 
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
-  const [geofenceGroupNames, setGeofenceGroupNames] = useState([]);
-
+  const [geofenceGroupNames, setGeofenceGroupNames] = useState<string[]>(['None']);
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId || 'bmc';
-
-  let option1 = [
-    '-',
-  ]
+  const orgId = session?.user?.orgId as string;
 
   useEffect(() => {
-    
-    // console.log(`option1 before ${JSON.stringify(option1)}`);
     const fetchGeofenceGroups = async () => {
-      // const allGeofenceGroups = await geofenceGroups(orgId);
-      // console.log(`useEffect called ${JSON.stringify(allGeofenceGroups)}`);
-      // const options = allGeofenceGroups.map((location: { geofenceLocationGroupName: any; })=> location.geofenceLocationGroupName);
-
-      // console.log(`options ${JSON.stringify(options)}`);
-      // option1=options;
-      // console.log(`option1 after ${JSON.stringify(option1)}`);
-      // setGeofenceGroupNames(options);
-      // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`);
+      const allGeofenceGroups = await geofenceGroups(orgId);
+      // console.log(`useEffect called ${JSON.stringify(allGeofenceGroups)}`, allGeofenceGroups);
+      const options = allGeofenceGroups.map((location: { geofenceLocationGroupName: any; })=> location.geofenceLocationGroupName);
+    
+      // console.log(`geofenceGrps:`, geofenceGrps);
+      setGeofenceGroupNames(['None', ...options]);
+      // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
     };
     fetchGeofenceGroups();
   }, []);
@@ -105,22 +98,30 @@ const Vehicles = () => {
       {
         accessorKey: "vehicleNumber",
         header: "Vehicle Number",
-        // enableEditing: () => {
-        //   console.log(`retrieving create flag ${creating}`)
-        //   return creating
-        // },
-        muiEditTextFieldProps: {
+        muiEditTextFieldProps: ({ row }) => ({
+          disabled: row.original.vehicleNumber ? true : false,
           required: true,
           error: !!validationErrors?.vehicleNumber,
           helperText: validationErrors?.vehicleNumber,
-          //remove any previous validation errors when vehicle focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
               vehicleNumber: undefined,
             }),
-          //optionally add validation checking for onBlur or onChange
+        }),
+      },
+      {
+        accessorKey: "isActive",
+        header: "Is Active?",
+        Cell: ({ row }) => (
+          row.original.isActive === '1' ? <CheckIcon sx={{ color: "#22c55e" }} /> :  <CloseIcon sx={{ color: "#ef4444" }} />
+        ),
+        muiEditTextFieldProps: {
+          defaultValue: 'true',
+          helperText: validationErrors?.isActive,
         },
+        editVariant: "select",
+        editSelectOptions: ['1', '0'],
       },
       {
         accessorKey: "make",
@@ -176,13 +177,13 @@ const Vehicles = () => {
       {
         accessorKey: "geofenceLocationGroupName",
         header: "Geofence Group",
-        // editVariant: "select",
-        // editSelectOptions: option1,
-        // muiEditTextFieldProps: {
-        //   select: true,
-        //   error: !!validationErrors?.geofenceLocationGroupName,
-        //   helperText: validationErrors?.geofenceLocationGroupName,
-        // },
+        editVariant: "select",
+        editSelectOptions: geofenceGroupNames,
+        muiEditTextFieldProps:{
+          select: true,
+          error: !!validationErrors?.geofenceLocationGroupName,
+          helperText: validationErrors?.geofenceLocationGroupName,
+        },
       },
       
     ],
@@ -200,7 +201,7 @@ const Vehicles = () => {
         sorting, //refetch when sorting changes
       ],
       queryFn: async ({ pageParam }) => {
-        console.log(`page param`, pageParam);
+        // console.log(`page param`, pageParam);
         const url = new URL("/node/api/vehicle/search", nodeServerUrl);
         url.searchParams.set("start", `${(pageParam as number) * fetchSize}`);
         url.searchParams.set("size", `${fetchSize}`);

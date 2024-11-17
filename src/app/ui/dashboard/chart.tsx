@@ -69,9 +69,7 @@ export default function Chart() {
 
         eventSource.onmessage = (event: { data: string }) => {
           const runningVehicleCount = JSON.parse(event.data);
-          console.log(
-            `chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`
-          );
+          // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
           let idleVehicleCount = allVehicleCount - runningVehicleCount;
           setData([
             { label: "Running", value: runningVehicleCount, color: "#4ade80" },

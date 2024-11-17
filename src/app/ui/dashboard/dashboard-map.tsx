@@ -114,7 +114,7 @@ export default function DashboardMap({
 
         eventSource.onmessage = (event: any) => {
           const eventData = JSON.parse(event.data);
-          console.log(`all vehicles fetched=>`, event.data);
+          // console.log(`all vehicles fetched=>`, event.data);
           if (eventData.length > 0) {
             const vehicle = eventData.map((event: any) => ({
               // const overlay = {

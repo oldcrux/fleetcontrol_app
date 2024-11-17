@@ -13,6 +13,7 @@ import {
   ChartOptions,
 } from "chart.js";
 import annotationPlugin from "chartjs-plugin-annotation";
+import { useSession } from "next-auth/react";
 
 // Register necessary chart components and annotation plugin
 ChartJS.register(
@@ -45,6 +46,8 @@ interface ChartData {
 
 const SpeedChart: React.FC<VehicleProps> = ({ vehicleNumber }) => {
     const [url, setUrl] = useState('');
+    const { data: session, status } = useSession();
+  const orgId = session?.user?.orgId;
 
 //   const timeZone = 'Asia/Kolkata';
 //   useEffect(() => {
@@ -132,20 +135,23 @@ useEffect(() => {
     const fetchUrl = async () => {
       try {
         const fetchedUrl = await fetchAppConfig('grafanaDashboard1');
-        console.log(`useEffect: url fetched: ${fetchedUrl}`);
+        // console.log(`useEffect: url fetched: ${fetchedUrl}`);
         setUrl(fetchedUrl);
       } catch (error) {
-        console.error('Error fetching URL:', error);
+        // console.error('Error fetching URL:', error);
       }
     };
 
     fetchUrl();
   }, []);
 
+  const finalUrl = `${url}${orgId}`;
+  // console.log(finalUrl);
+
   return (
     <div style={{ width: '100%', height: '100%' }}>
       {url ? (
-        <iframe src={url} width="100%" height="100%" style={{ border: 'none' }} />
+        <iframe src={finalUrl} width="100%" height="100%" style={{ border: 'none' }} />
       ) : (
         <p>Loading...</p> // You can show a loading message while the URL is being fetched
       )}
@@ -154,5 +160,3 @@ useEffect(() => {
 };
 
 export default SpeedChart;
-
-

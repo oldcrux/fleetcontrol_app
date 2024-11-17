@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
 First, run the development server:
 
-```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### .env.development
+NEXT_PUBLIC_GOOGLE_MAP_API_KEY=AIzaSyAmLKxnKyFoCKTmuKG6hb0Yt347Ab4gXjQ
+NEXT_PUBLIC_NODE_SERVER_URL=http://localhost:8080
+AUTH_SECRET=bb9u0srGafGVy5smDOkRZTtD0i74XOS5q45rTkinsRc=
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_CACHE_GLOBAL_TIMEOUT=3600     #1 hour
 
-## Learn More
+AUTH_MAX_AGE=14400    #, // 4 hours
+AUTH_UPDATE_AGE=36000     #10 * 60 * 60 // 10 hours
 
-To learn more about Next.js, take a look at the following resources:
+### .env.production
+NEXT_PUBLIC_GOOGLE_MAP_API_KEY=AIzaSyAmLKxnKyFoCKTmuKG6hb0Yt347Ab4gXjQ
+NEXT_PUBLIC_NODE_SERVER_URL=https://fleetcontrol.oldcrux.com
+AUTH_SECRET=bb9u0srGafGVy5smDOkRZTtD0i74XOS5q45rTkinsRc=
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+REDIS_HOST=10.10.0.7
+REDIS_PORT=6379
+REDIS_CACHE_GLOBAL_TIMEOUT=3600     #1 hour
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+AUTH_MAX_AGE=14400    # // 4 hours
+AUTH_UPDATE_AGE=36000     #10 * 60 * 60 // 10 hours
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Docker build and push
+docker build --no-cache --platform linux/amd64 -t asia-south1-docker.pkg.dev/fleetcontrol-15092024/oldcruxrepo/nodeapp:latest .
+docker push asia-south1-docker.pkg.dev/fleetcontrol-15092024/oldcruxrepo/nodeapp:latest
