@@ -33,6 +33,16 @@ declare module 'next-auth' {
 //   orgId: string;
 // };
 
+export type Geofence = {
+  geofenceType: string;
+  radius: string;
+  lat?: number;
+  lng?: number;
+  center?: {
+    lat: number;
+    lng: number;
+  };
+};
 
 export interface Vehicle {
   vehicleNumber: string;

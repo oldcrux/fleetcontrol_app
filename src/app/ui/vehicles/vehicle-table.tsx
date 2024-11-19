@@ -91,7 +91,7 @@ const Vehicles = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleBulkCreateVehicle = (data: any) => {
-    console.log('Saved Data:', data);
+    // console.log('Saved Data:', data);
     setIsModalOpen(false);
 
     const updatedData = data.map((item: any) => ({
@@ -99,9 +99,7 @@ const Vehicles = () => {
       createdBy: userId,
       orgId: orgId
     }));
-
     bulkCreateVehicle(updatedData);
-    // Add your logic to send this data to your API or save it in the system
   };
 
   useEffect(() => {

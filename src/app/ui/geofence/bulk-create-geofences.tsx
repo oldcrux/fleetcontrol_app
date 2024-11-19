@@ -7,7 +7,7 @@ type JsonPopupProps = {
   onSave: (data: any) => void; // A function that takes parsed JSON data
 };
 
-export const BulkCreateVehicle: React.FC<JsonPopupProps> = ({
+export const BulkCreateGeofences: React.FC<JsonPopupProps> = ({
   show,
   onClose,
   onSave,
@@ -19,7 +19,6 @@ export const BulkCreateVehicle: React.FC<JsonPopupProps> = ({
       const parsedData = JSON.parse(jsonContent);
       onSave(parsedData);
       setJsonContent('');
-      window.location.reload(); 
     } catch (error) {
       alert("Invalid JSON format. Please correct it.");
     }
@@ -48,7 +47,7 @@ export const BulkCreateVehicle: React.FC<JsonPopupProps> = ({
         }}
       >
         <Typography variant="h6" color="black" component="h2" id="modal-title" gutterBottom>
-          Bulk Create Vehicle
+          Bulk Create Geofences
         </Typography>
         <TextField
           label="Paste JSON Content"

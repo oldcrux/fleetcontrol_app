@@ -196,7 +196,7 @@ export default function DashboardMap({
 
   return (
     <>
-      <div className="relative h-screen p-2">
+      <div className="h-screen p-2">
         <Map
           defaultZoom={14}
           defaultCenter={{ lat: 20.2827, lng: 85.8427 }}
