@@ -18,17 +18,17 @@ export function CreateVehicle() {
   );
 }
 
-export function BulkCreateVehicles() {
-  return (
-    <Link
-      href="/dashboard/vehicles/create"
-      className="btn-primary"
-    >
-      <span className="hidden md:block">Bulk Create Vehicle</span>{' '}
-      <PlaylistAddIcon className="h-5 md:ml-4" />
-    </Link>
-  );
-}
+// export function BulkCreateVehicles() {
+//   return (
+//     <Link
+//       href="/dashboard/vehicles/create"
+//       className="btn-primary"
+//     >
+//       <span className="hidden md:block">Bulk Create Vehicle</span>{' '}
+//       <PlaylistAddIcon className="h-5 md:ml-4" />
+//     </Link>
+//   );
+// }
 
 
 export function UpdateVehicle({ id }: { id: string }) {

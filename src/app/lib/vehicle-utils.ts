@@ -18,6 +18,16 @@ const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 //   orgId: string
 // }
 
+export async function bulkCreateVehicle(vehicles: any) {
+  console.log(`create vehicle data `, vehicles);
+  const response = await axios.post(`${nodeServerUrl}/node/api/vehicle/bulkCreate`, vehicles, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.status;
+}
+
 export async function createVehicle(orgId: string, userId: string, vehicle: Vehicle) {
   // console.log(`create vehicle data ${JSON.stringify(data)}`);
   vehicle.orgId = orgId;
