@@ -19,7 +19,7 @@ import {
   MRT_Row,
   DropdownOption,
   MRT_ActionMenuItem,
-  MRT_Cell
+  MRT_Cell,
 } from "material-react-table";
 import {
   Box,
@@ -38,19 +38,25 @@ import {
   useInfiniteQuery,
   useQueryClient,
   useMutation,
-  useQuery
+  useQuery,
 } from "@tanstack/react-query"; //Note: this is TanStack React Query V5
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CheckIcon from '@mui/icons-material/Check';
+import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { Button } from "../button";
 import { geofenceGroups } from "@/app/lib/geofence-utils";
-import { createVehicle, deleteVehicle, updateVehicle } from "@/app/lib/vehicle-utils";
+import {
+  bulkCreateVehicle,
+  createVehicle,
+  deleteVehicle,
+  updateVehicle,
+} from "@/app/lib/vehicle-utils";
 import { Vehicle } from "@/app/lib/types";
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
+import { BulkCreateVehicle } from "./bulk-create-vehicle";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -76,18 +82,39 @@ const Vehicles = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
-  const [geofenceGroupNames, setGeofenceGroupNames] = useState<string[]>(['None']);
+  const [geofenceGroupNames, setGeofenceGroupNames] = useState<string[]>([
+    "None",
+  ]);
   const { data: session } = useSession();
   const orgId = session?.user?.orgId as string;
+  const userId = session?.user?.userId || "";
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleBulkCreateVehicle = (data: any) => {
+    console.log('Saved Data:', data);
+    setIsModalOpen(false);
+
+    const updatedData = data.map((item: any) => ({
+      ...item,
+      createdBy: userId,
+      orgId: orgId
+    }));
+
+    bulkCreateVehicle(updatedData);
+    // Add your logic to send this data to your API or save it in the system
+  };
 
   useEffect(() => {
     const fetchGeofenceGroups = async () => {
       const allGeofenceGroups = await geofenceGroups(orgId);
       // console.log(`useEffect called ${JSON.stringify(allGeofenceGroups)}`, allGeofenceGroups);
-      const options = allGeofenceGroups.map((location: { geofenceLocationGroupName: any; })=> location.geofenceLocationGroupName);
-    
+      const options = allGeofenceGroups.map(
+        (location: { geofenceLocationGroupName: any }) =>
+          location.geofenceLocationGroupName
+      );
+
       // console.log(`geofenceGrps:`, geofenceGrps);
-      setGeofenceGroupNames(['None', ...options]);
+      setGeofenceGroupNames(["None", ...options]);
       // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
     };
     fetchGeofenceGroups();
@@ -113,27 +140,30 @@ const Vehicles = () => {
       {
         accessorKey: "isActive",
         header: "Is Active?",
-        Cell: ({ row }) => (
-          row.original.isActive === '1' ? <CheckIcon sx={{ color: "#22c55e" }} /> :  <CloseIcon sx={{ color: "#ef4444" }} />
-        ),
+        Cell: ({ row }) =>
+          row._valuesCache.isActive === "1" ? (
+            <CheckIcon sx={{ color: "#22c55e" }} />
+          ) : (
+            <CloseIcon sx={{ color: "#ef4444" }} />
+          ),
         muiEditTextFieldProps: {
-          defaultValue: 'true',
+          defaultValue: "true",
           helperText: validationErrors?.isActive,
         },
         editVariant: "select",
-        editSelectOptions: ['1', '0'],
+        editSelectOptions: ["1", "0"],
       },
       {
         accessorKey: "make",
-        header: "Make"
+        header: "Make",
       },
       {
         accessorKey: "model",
-        header: "Model"
+        header: "Model",
       },
       {
         accessorKey: "owner",
-        header: "Owner"
+        header: "Owner",
       },
       {
         accessorKey: "primaryPhoneNumber",
@@ -172,25 +202,24 @@ const Vehicles = () => {
       },
       {
         accessorKey: "vehicleGroup",
-        header: "Vehicle Group"
+        header: "Vehicle Group",
       },
       {
         accessorKey: "geofenceLocationGroupName",
         header: "Geofence Group",
         editVariant: "select",
         editSelectOptions: geofenceGroupNames,
-        muiEditTextFieldProps:{
+        muiEditTextFieldProps: {
           select: true,
           error: !!validationErrors?.geofenceLocationGroupName,
           helperText: validationErrors?.geofenceLocationGroupName,
         },
       },
-      
     ],
-    [validationErrors]
+    [geofenceGroupNames, validationErrors]
   );
 
-  const { data, fetchNextPage, isError, isFetching, isLoading,refetch } =
+  const { data, fetchNextPage, isError, isFetching, isLoading, refetch } =
     useInfiniteQuery<VehicleApiResponse>({
       queryKey: [
         "table-data",
@@ -214,6 +243,7 @@ const Vehicles = () => {
         const response = await axios.get(url.toString());
         // console.log(`data received ${JSON.stringify(response.data)}`);
         // const json = (await response.json()) as VehicleApiResponse;
+
         return response.data;
       },
       initialPageParam: 0,
@@ -328,7 +358,7 @@ const Vehicles = () => {
     enableSorting: false,
     // enableGlobalFilter: false,
     // enableFilters: false,
-    enableDensityToggle:false,
+    enableDensityToggle: false,
 
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleCreateVehicle,
@@ -370,22 +400,20 @@ const Vehicles = () => {
       //     icon={<EditIcon />}
       //     key="edit"
       //     label="Edit"
-      //     onClick={() => 
+      //     onClick={() =>
       //     {table.setEditingRow(row)}
       //     }
       //     table={table}
       //   />,
-        <MRT_ActionMenuItem
-          icon={<DeleteIcon color="error" />}
-          key={`delete-${row.original.vehicleNumber}`}
-          label="Delete"
-          onClick={() => 
-          {
-            openDeleteConfirmModal(row)
-          }
-          }
-          table={table}
-        />,
+      <MRT_ActionMenuItem
+        icon={<DeleteIcon color="error" />}
+        key={`delete-${row.original.vehicleNumber}`}
+        label="Delete"
+        onClick={() => {
+          openDeleteConfirmModal(row);
+        }}
+        table={table}
+      />,
     ],
 
     // enableRowActions:true,
@@ -394,7 +422,7 @@ const Vehicles = () => {
     //     <Tooltip title="Edit">
     //       <IconButton onClick={() => {
     //         // console.log(`setting creating to false`);
-    //         // setCreating(false); 
+    //         // setCreating(false);
     //         table.setEditingRow(row)}}>
     //         <EditIcon />
     //       </IconButton>
@@ -406,9 +434,10 @@ const Vehicles = () => {
     //     </Tooltip>
     //   </Box>
     // ),
-    
 
     renderTopToolbarCustomActions: ({ table }) => (
+      <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <Button
         onClick={() => {
           // console.log(`setting creating flag to true`);
@@ -424,7 +453,12 @@ const Vehicles = () => {
       >
         Create New Vehicle
       </Button>
-      
+      <Button onClick={() => setIsModalOpen(true)}>
+       Bulk Create Vehicle</Button>
+
+       <BulkCreateVehicle show={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleBulkCreateVehicle} />
+       </div>
+      </>
     ),
     // initialState: {
     //   density: 'compact',
@@ -470,7 +504,7 @@ function useCreateVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId || "" ;
+  const orgId = session?.user?.orgId || "";
   const userId = session?.user?.userId || "";
 
   return useMutation({
@@ -479,8 +513,7 @@ function useCreateVehicle() {
       return Promise.resolve(status);
     },
     //client side optimistic update
-    onMutate: (newVehicleInfo: Vehicle) => {
-    },
+    onMutate: (newVehicleInfo: Vehicle) => {},
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['vehicles'] }), //refetch vehicles after mutation, disabled for demo
   });
 }
@@ -554,6 +587,7 @@ function useDeleteVehicle() {
     },
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['vehicles'] }), //refetch vehicles after mutation, disabled for demo
   });
+  
 }
 
 const queryClient = new QueryClient();
@@ -579,10 +613,14 @@ const validateSerialNumber = (value: any) => {
 
 function validateVehicle(vehicle: Vehicle) {
   return {
-    vehicleNumber: !validateRequired(vehicle.vehicleNumber) ? "Vehicle Number is Required" : "",
-    primaryPhoneNumber: !validateRequiredNumber(vehicle.primaryPhoneNumber) ? "Primary Phone Number is Required" : "",
-    serialNumber: !validateSerialNumber(vehicle.serialNumber) ? "Serial Number is Required" : "",
+    vehicleNumber: !validateRequired(vehicle.vehicleNumber)
+      ? "Vehicle Number is Required"
+      : "",
+    primaryPhoneNumber: !validateRequiredNumber(vehicle.primaryPhoneNumber)
+      ? "Primary Phone Number is Required"
+      : "",
+    serialNumber: !validateSerialNumber(vehicle.serialNumber)
+      ? "Serial Number is Required"
+      : "",
   };
 }
-
-
