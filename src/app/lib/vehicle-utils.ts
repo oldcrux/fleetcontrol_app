@@ -66,6 +66,19 @@ export async function searchVehicle(orgId: string, query: string, currentPage: n
   }
 }
 
+export async function searchVehicleByNumber(orgId: string, vehicleNumber: string) {
+  try {
+    // console.log(`vehicleutils:searchVehicle: query String ${query}`);
+    const response = await axios.get(`${nodeServerUrl}/node/api/vehicle/search/vehicleNumber?orgId=${orgId}&vehicleNumber=${vehicleNumber}`);
+
+    console.log(`vehicleutils:searchVehicleByNumber: response received ${JSON.stringify(response.data)}`);
+    const vehicle = response.data;
+    return vehicle[0];
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function deleteVehicle(userId: string, orgId: string, vehicleNumber: String) {
   // console.log(`updating vehicle data ${JSON.stringify(vehicle)}`);
   // vehicle.orgId='bmc';

@@ -452,7 +452,7 @@ const Vehicles = () => {
         Create New Vehicle
       </Button>
       <Button onClick={() => setIsModalOpen(true)}>
-       Bulk Create Vehicle</Button>
+       Bulk Create Vehicles</Button>
 
        <BulkCreateVehicle show={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleBulkCreateVehicle} />
        </div>

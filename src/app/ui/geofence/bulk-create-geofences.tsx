@@ -18,7 +18,7 @@ export const BulkCreateGeofences: React.FC<JsonPopupProps> = ({
     try {
       const parsedData = JSON.parse(jsonContent);
       onSave(parsedData);
-      setJsonContent('');
+      setJsonContent("");
     } catch (error) {
       alert("Invalid JSON format. Please correct it.");
     }
@@ -46,7 +46,13 @@ export const BulkCreateGeofences: React.FC<JsonPopupProps> = ({
           overflow: "auto", // Ensures content scrolls if it overflows
         }}
       >
-        <Typography variant="h6" color="black" component="h2" id="modal-title" gutterBottom>
+        <Typography
+          variant="h6"
+          color="black"
+          component="h2"
+          id="modal-title"
+          gutterBottom
+        >
           Bulk Create Geofences
         </Typography>
         <TextField
@@ -60,6 +66,7 @@ export const BulkCreateGeofences: React.FC<JsonPopupProps> = ({
           placeholder="Paste your JSON content here"
           sx={{ mb: 2 }}
         />
+
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button variant="outlined" onClick={onClose} sx={{ mr: 1 }}>
             Cancel
