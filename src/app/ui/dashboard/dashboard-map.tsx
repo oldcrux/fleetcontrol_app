@@ -132,6 +132,7 @@ export default function DashboardMap({
               // return overlay;
               ignition:event.ignition,
               key:event.vehicleNumber,
+              speed:event.speed,
               location:{
                 lat:event.latitude,
                 lng:event.longitude

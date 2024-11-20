@@ -17,26 +17,33 @@ import {
 } from "@vis.gl/react-google-maps";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import { searchVehicleByNumber } from "@/app/lib/vehicle-utils";
+import { useSession } from "next-auth/react";
+import { Vehicle } from "@/app/lib/types";
 
-type Vehicle = {
+type GeoVehicle = {
   key: string;
   location: google.maps.LatLngLiteral;
   ignition: number;
+  speed: number;
 };
 
 interface InfoWindowProps {
-  ignition: number; // or the appropriate type
-  position: google.maps.LatLng | google.maps.LatLngLiteral; // adjust based on your usage
-  content: string; // or string, depending on your content
-  map?: google.maps.Map; // adjust based on your usage
-  anchor: google.maps.marker.AdvancedMarkerElement; // updated to AdvancedMarkerElement
+  ignition: number;
+  position: google.maps.LatLng | google.maps.LatLngLiteral;
+  speed: number,
+  vehicleNumber: string;
+  map?: google.maps.Map;
+  anchor: google.maps.marker.AdvancedMarkerElement;
 }
 
-export const VehicleMarkers = (props: { vehicles: Vehicle[] }) => {
+export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
   const map = useMap();
   const [markers, setMarkers] = useState<{
     [key: string]: google.maps.marker.AdvancedMarkerElement;
   }>({});
+  const [openMarkerKey, setOpenMarkerKey] = useState<string | null>(null);
+
   const clusterer = useRef<MarkerClusterer | null>(null);
 
   useEffect(() => {
@@ -68,27 +75,40 @@ export const VehicleMarkers = (props: { vehicles: Vehicle[] }) => {
     });
   };
 
+  const handleMarkerClick = (key: string) => {
+    setOpenMarkerKey((prevKey) => (prevKey === key ? null : key)); // Toggle open/close
+  };
+
   return (
     <>
-      {props.vehicles.map((vehicle: Vehicle) => (
+      {props.vehicles.map((vehicle: GeoVehicle) => (
         <React.Fragment key={vehicle.key}>
           <AdvancedMarkerWithRef
             position={vehicle.location}
             ref={(marker) => setMarkerRef(marker, vehicle.key)}
+            onClick={(marker) => {
+              if (marker) {
+                handleMarkerClick(vehicle.key);
+              }
+            }}
           >
             <div>
               <DirectionsCarIcon
-                sx={{ color: vehicle.ignition === 1 ? "green" : "grey" }}
+                sx={{ color: vehicle.ignition === 0 ? "grey" : vehicle.speed <= 40 ? "green" : "red" }} // TODO remove speedlimit hardcoded
               />
             </div>
           </AdvancedMarkerWithRef>
-          <InfoWindow
-            ignition={vehicle.ignition}
-            position={vehicle.location}
-            content={`${vehicle.key}`}
-            map={map!}
-            anchor={markers[vehicle.key]}
-          />
+
+          {openMarkerKey === vehicle.key && (
+            <InfoWindow
+              ignition={vehicle.ignition}
+              position={vehicle.location}
+              speed={vehicle.speed}
+              vehicleNumber={`${vehicle.key}`}
+              map={map!}
+              anchor={markers[vehicle.key]}
+            />
+          )}
         </React.Fragment>
       ))}
     </>
@@ -99,26 +119,54 @@ export const VehicleMarkers = (props: { vehicles: Vehicle[] }) => {
 const InfoWindow: React.FC<InfoWindowProps> = ({
   ignition,
   position,
-  content,
+  speed,
+  vehicleNumber,
   map,
   anchor,
 }) => {
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
+  const { data: session, status } = useSession();
+  const orgId = session?.user?.orgId as string;
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+
   useEffect(() => {
+    const fetchVehicle = async () => {
+      try {
+        const fetchedVehicle = await searchVehicleByNumber(
+          orgId,
+          vehicleNumber
+        );
+        setVehicle(fetchedVehicle); // Update state with fetched vehicle
+      } catch (error) {
+        console.error("Error fetching vehicle:", error);
+      }
+    };
+
+    fetchVehicle();
+  }, [orgId, vehicleNumber]);
+
+  useEffect(() => {
+    if (!vehicle || !map || !anchor) return;
+
     if (!infoWindowRef.current) {
       infoWindowRef.current = new google.maps.InfoWindow({
         disableAutoPan: true,
-        headerDisabled: true,
+        headerDisabled: false,
         pixelOffset: new google.maps.Size(0, -15),
       });
     }
 
     const backgroundColorClass =
-      ignition === 1 ? "bg-green-300" : "bg-gray-300";
-    const styledContent = `
-      <div class="font-sans ${backgroundColorClass} rounded shadow pt-0">
-        <h8 class="text-xs font-bold text-gray-800">${content}</h8>
+      ignition === 0 ? "bg-gray-300" : speed <= 40 ? "bg-green-300" : "bg-red-500" ; // TODO remove speedlimit hardcoded
+      const formattedPosition = `lat: ${position.lat}, lng: ${position.lng}`;
+      const styledContent = `
+      <div class="font-sans ${backgroundColorClass} rounded shadow pt-2 px-2">
+        <div class="text-xs font-bold text-gray-800">${vehicleNumber}</div>
+        <div class="text-xs font-bold text-gray-800">${formattedPosition}</div>
+        <div class="text-xs font-bold text-gray-800">Speed: ${speed}</div>
+        <div class="text-xs font-bold text-gray-800">Ph: ${vehicle?.primaryPhoneNumber}</div>
+        <div class="text-xs font-bold text-gray-800">Owner: ${vehicle?.owner}</div>
       </div>`;
 
     infoWindowRef.current.setContent(styledContent);
@@ -127,7 +175,7 @@ const InfoWindow: React.FC<InfoWindowProps> = ({
     return () => {
       infoWindowRef.current?.close();
     };
-  }, [position, content, map, anchor]);
+  }, [vehicle]);
   return null;
 };
 
