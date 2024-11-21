@@ -5,8 +5,6 @@ import React, {
   useCallback,
   forwardRef,
 } from "react";
-import ReactDOM from 'react-dom/client';
-
 import {
   APIProvider,
   Map,
@@ -22,9 +20,6 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { searchVehicleByNumber } from "@/app/lib/vehicle-utils";
 import { useSession } from "next-auth/react";
 import { Vehicle } from "@/app/lib/types";
-import Modal from "react-modal";
-import CloseIcon from "@mui/icons-material/Close";
-import TravelPath from "./travel-path";
 
 type GeoVehicle = {
   key: string;
@@ -48,7 +43,6 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
     [key: string]: google.maps.marker.AdvancedMarkerElement;
   }>({});
   const [openMarkerKey, setOpenMarkerKey] = useState<string | null>(null);
-  const [clicked, setClicked] = useState(false);
 
   const clusterer = useRef<MarkerClusterer | null>(null);
 
@@ -97,7 +91,7 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
                 handleMarkerClick(vehicle.key);
               }
             }}
-            >
+          >
             <div>
               <DirectionsCarIcon
                 sx={{ color: vehicle.ignition === 0 ? "#454141" : vehicle.speed <= 40 ? "green" : "red" }} // TODO remove speedlimit hardcoded
@@ -122,7 +116,7 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
 };
 
 // InfoWindow component
-export const InfoWindow: React.FC<InfoWindowProps> = ({
+const InfoWindow: React.FC<InfoWindowProps> = ({
   ignition,
   position,
   speed,
@@ -135,7 +129,6 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
   const { data: session, status } = useSession();
   const orgId = session?.user?.orgId as string;
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -154,114 +147,35 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
   }, [orgId, vehicleNumber]);
 
   useEffect(() => {
-    if (!map || !anchor) return;
+    if (!vehicle || !map || !anchor) return;
 
     if (!infoWindowRef.current) {
       infoWindowRef.current = new google.maps.InfoWindow({
         disableAutoPan: true,
-        headerDisabled: true,
+        headerDisabled: false,
         pixelOffset: new google.maps.Size(0, -15),
       });
     }
 
-    const InfoWindowContent: React.FC = () => {
-      const handleButtonClick = (event: React.MouseEvent) => {
-        event.stopPropagation(); // Prevent the event from bubbling to the outer container
-        console.log(`Button clicked for vehicle: ${vehicleNumber}`);
-        setModalIsOpen(true);
+    const backgroundColorClass =
+      ignition === 0 ? "bg-gray-300" : speed <= 40 ? "bg-green-300" : "bg-red-400" ; // TODO remove speedlimit hardcoded
+      const formattedPosition = `lat: ${position.lat}, lng: ${position.lng}`;
+      const styledContent = `
+      <div class="font-sans ${backgroundColorClass} rounded shadow pt-2 px-2">
+        <div class="text-xs font-bold text-gray-800">${vehicleNumber}</div>
+        <div class="text-xs font-bold text-gray-800">${formattedPosition}</div>
+        <div class="text-xs font-bold text-gray-800">Speed: ${speed}</div>
+        <div class="text-xs font-bold text-gray-800">Ph: ${vehicle?.primaryPhoneNumber}</div>
+        <div class="text-xs font-bold text-gray-800">Owner: ${vehicle?.owner}</div>
+      </div>`;
 
-        // const url = `/vehicle-details/${vehicleNumber}`; // Example: dynamic URL for the vehicle
-        // window.open(url, '_blank'); 
-      };
-
-      return (
-        <>
-        <div
-          style={{
-            color: 'black',
-            fontFamily: 'Arial, sans-serif',
-            background: ignition === 0 ? "#d1d5db" : speed <= 40 ? "#86efac" : "#f87171" , // TODO remove speedlimit hardcoded
-            borderRadius: '8px',
-            padding: '10px',
-            boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
-          }}
-        >
-          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-            {vehicleNumber}
-          </div>
-          <div>Position: {`lat: ${position.lat}, lng: ${position.lng}`}</div>
-          <div>Speed: {speed}</div>
-          <div>Ph: {vehicle?.primaryPhoneNumber}</div>
-          <div>Owner: {vehicle?.owner}</div>
-          {/* <button
-            style={{
-              marginTop: '8px',
-              padding: '5px 10px',
-              background: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-            onClick={handleButtonClick}
-          >
-            View Travel Path
-          </button> */}
-        </div>
-
-        </>
-      );
-    };
-
-    const container = document.createElement('div');
-    const root = ReactDOM.createRoot(container);
-    root.render(<InfoWindowContent />);
-
-    infoWindowRef.current.setContent(container);
+    infoWindowRef.current.setContent(styledContent);
     infoWindowRef.current.open(map, anchor);
 
-    const handleContentClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('button')) {
-        infoWindowRef.current?.close();
-      }
-    };
-    container.addEventListener('click', handleContentClick);
-
     return () => {
-      root.unmount();
       infoWindowRef.current?.close();
     };
   }, [vehicle]);
-
-  return (
-    <>
-    <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
-        contentLabel="Detail"
-        ariaHideApp={false}
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.75)", // Optional: Adjust overlay background color
-          },
-          content: {
-            // You can leave content styles empty if using Tailwind classes
-          },
-        }}
-      >
-        <div className="absolute top-1 right-1 mr-2 mt-2">
-          <button
-            className="absolute top-1 right-1 -mr-3 -mt-3 z-30 text-black rounded-full w-5 h-5 flex items-center justify-center"
-            onClick={() => setModalIsOpen(false)}
-          >
-            <CloseIcon />
-          </button>
-        </div>
-        <TravelPath vehicleNumber={vehicleNumber} />
-      </Modal>
-      </>
-  );
   return null;
 };
 

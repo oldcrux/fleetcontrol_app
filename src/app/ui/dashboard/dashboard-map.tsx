@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
-import {
-  Map,
-} from "@vis.gl/react-google-maps";
+import {Map} from "@vis.gl/react-google-maps";
 
 import { createGeofence, searchGeofence } from "@/app/lib/geofence-utils";
 import { geofenceDrawingManager } from "../util/geofence-drawing-manager";
@@ -117,19 +115,6 @@ export default function DashboardMap({
           // console.log(`all vehicles fetched=>`, event.data);
           if (eventData.length > 0) {
             const vehicle = eventData.map((event: any) => ({
-              // const overlay = {
-              //   type: "marker",
-              //   latitude: event.latitude,
-              //   longitude: event.longitude,
-              //   metadata: event.vehicleNumber,
-              // };
-              // // I should be able to add vehicle marker here on the map
-              // if (drawingManager && overlay)
-              // {
-              //   console.log(`dashboardmap:fetchRunningVehicles: creating vehicle marker=> `)
-              //   // new google.maps.marker
-              // }
-              // return overlay;
               ignition:event.ignition,
               key:event.vehicleNumber,
               speed:event.speed,
@@ -137,7 +122,6 @@ export default function DashboardMap({
                 lat:event.latitude,
                 lng:event.longitude
               }
-              
             }));
             // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
             setVehicles(vehicle);

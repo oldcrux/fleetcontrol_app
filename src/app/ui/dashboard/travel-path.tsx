@@ -6,6 +6,7 @@ import {
   Marker,
 } from "@react-google-maps/api";
 import { fetchVehiclesTravelPath } from "@/app/lib/vehicle-utils";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
 
@@ -55,6 +56,13 @@ const TravelPath: React.FC<TravelPathProps> = ({ vehicleNumber }) => {
       self.findIndex((t) => t.lat === coord.lat && t.lng === coord.lng)
   ); // Find repeated coordinates
 
+  const getSvgIconPathData = () => {
+    const icon = <DirectionsCarIcon />;
+    const svgString = new XMLSerializer().serializeToString(icon.props.children);
+    return encodeURIComponent(svgString);
+  };
+  const carIconUrl = `data:image/svg+xml;utf8,${getSvgIconPathData}`;
+  
   return (
     <div className="relative h-screen p-2">
       <GoogleMap
@@ -76,12 +84,12 @@ const TravelPath: React.FC<TravelPathProps> = ({ vehicleNumber }) => {
           }}
         />
 
-        {/* {repeatedCoords.map((coord, idx) => (
+
           <Marker
-            key={idx}
-            position={coord}
+            key={vehicleNumber}
+            position={end}
             icon={{
-              path: google.maps.SymbolPath.CIRCLE,
+              url: carIconUrl,
               scale: 8, // Bigger size for repeated location
               fillColor: "blue",
               fillOpacity: 1,
@@ -89,7 +97,7 @@ const TravelPath: React.FC<TravelPathProps> = ({ vehicleNumber }) => {
               strokeColor: "blue",
             }}
           />
-        ))} */}
+
       </GoogleMap>
     </div>
   );

@@ -15,7 +15,8 @@ import {
   type MRT_SortingState,
   type MRT_RowVirtualizer,
 } from 'material-react-table';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button, Tooltip } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
   QueryClient,
   QueryClientProvider,
@@ -24,7 +25,9 @@ import {
 
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
-
+import { latestVehicleTelemetryReport } from '@/app/lib/telemetry-utils';
+import { generateVehicleExcel, generateVehicleExcelAndDownload } from './report-export';
+import { download } from 'export-to-csv'; 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
 //Your API response shape will probably be different. Knowing a total row count is important though.
@@ -53,6 +56,10 @@ const columns: MRT_ColumnDef<VehicleTelemetryReport>[] = [
   {
     header: 'Vehicle Number',
     accessorKey: 'vehicleNumber',
+  },
+  {
+    header: 'Owner',
+    accessorKey: 'owner',
   },
   {
     header: 'Geofence Group',
@@ -113,6 +120,9 @@ const columns: MRT_ColumnDef<VehicleTelemetryReport>[] = [
           color = 'text-red-950 bg-red-800';
         }
 
+        if(!percentageRounded){
+          return <span>-</span>; 
+        }
         return (
          <Typography className={`rounded-full px-2 py-1 ${color}`}  > {percentageRounded}</Typography>
         );
@@ -246,6 +256,12 @@ const GeofenceReport = () => {
     fetchMoreOnBottomReached(tableContainerRef.current);
   }, [fetchMoreOnBottomReached]);
 
+  const handleExportData = async () => {
+    const reportData = await latestVehicleTelemetryReport(orgId as string);
+    const xlsFilePath = await generateVehicleExcelAndDownload(reportData);
+    // const csv = generateCsv(csvConfig)(data);
+  };
+
   const table = useMaterialReactTable({
     columns,
     data: flatData,
@@ -282,6 +298,28 @@ const GeofenceReport = () => {
       <Typography>
         Fetched {totalFetched} of {totalDBRowCount} total rows.
       </Typography>
+    ),
+    renderTopToolbarCustomActions: ({ table }) => (
+      <Box
+        sx={{
+          display: 'flex',
+          gap: '16px',
+          padding: '8px',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-end', 
+        }}
+      >
+        <Tooltip title="Download latest vehicle report" arrow placement="top">
+        <Button
+          sx={{
+            color:'grey',
+          }}
+          onClick={handleExportData}
+          startIcon={<FileDownloadIcon />}
+        >
+        </Button>
+        </Tooltip>
+      </Box>
     ),
     state: {
       columnFilters,
