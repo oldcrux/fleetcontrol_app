@@ -246,7 +246,7 @@ export async function fetchVehiclesTravelPath(vehicleNumber: string, ) {
 
 export async function fetchAppConfig(configKey: string, ) {
   const grafanaUrl = await
-    axios.get(`${nodeServerUrl}/node/api/appconfig/search?configKey=${configKey}`);
+    axios.get(`${nodeServerUrl}/node/api/appconfig/search?configKey=${configKey}`); //TODO Add orgId
   const url = grafanaUrl.data;
   // console.log(`url fetched:`, url.configValue);
   return url.configValue;
