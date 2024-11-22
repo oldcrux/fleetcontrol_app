@@ -44,7 +44,7 @@ interface ChartData {
   }[];
 }
 
-const SpeedChart: React.FC<VehicleProps> = ({ vehicleNumber }) => {
+const Grafana: React.FC<VehicleProps> = ({ vehicleNumber }) => {
     const [url, setUrl] = useState('');
     const { data: session, status } = useSession();
   const orgId = session?.user?.orgId;
@@ -145,7 +145,7 @@ useEffect(() => {
     fetchUrl();
   }, []);
 
-  const finalUrl = `${url}${orgId}`;
+  const finalUrl = `${url}${orgId}&&var-vehicleNumber=${vehicleNumber}`;
   // console.log(finalUrl);
 
   return (
@@ -159,4 +159,4 @@ useEffect(() => {
   );
 };
 
-export default SpeedChart;
+export default Grafana;

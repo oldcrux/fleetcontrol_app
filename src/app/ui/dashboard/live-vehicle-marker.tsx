@@ -5,7 +5,7 @@ import React, {
   useCallback,
   forwardRef,
 } from "react";
-import ReactDOM from 'react-dom/client';
+import ReactDOM from "react-dom/client";
 
 import {
   APIProvider,
@@ -25,6 +25,7 @@ import { Vehicle } from "@/app/lib/types";
 import Modal from "react-modal";
 import CloseIcon from "@mui/icons-material/Close";
 import TravelPath from "./travel-path";
+import Grafana from "./grafana";
 
 type GeoVehicle = {
   key: string;
@@ -36,7 +37,7 @@ type GeoVehicle = {
 interface InfoWindowProps {
   ignition: number;
   position: google.maps.LatLng | google.maps.LatLngLiteral;
-  speed: number,
+  speed: number;
   vehicleNumber: string;
   map?: google.maps.Map;
   anchor: google.maps.marker.AdvancedMarkerElement;
@@ -97,10 +98,17 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
                 handleMarkerClick(vehicle.key);
               }
             }}
-            >
+          >
             <div>
               <DirectionsCarIcon
-                sx={{ color: vehicle.ignition === 0 ? "#454141" : vehicle.speed <= 40 ? "green" : "red" }} // TODO remove speedlimit hardcoded
+                sx={{
+                  color:
+                    vehicle.ignition === 0
+                      ? "#454141"
+                      : vehicle.speed <= 40
+                      ? "green"
+                      : "red",
+                }} // TODO remove speedlimit hardcoded
               />
             </div>
           </AdvancedMarkerWithRef>
@@ -171,49 +179,45 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
         setModalIsOpen(true);
 
         // const url = `/vehicle-details/${vehicleNumber}`; // Example: dynamic URL for the vehicle
-        // window.open(url, '_blank'); 
+        // window.open(url, '_blank');
       };
 
       return (
         <>
-        <div
-          style={{
-            color: 'black',
-            fontFamily: 'Arial, sans-serif',
-            background: ignition === 0 ? "#d1d5db" : speed <= 40 ? "#86efac" : "#f87171" , // TODO remove speedlimit hardcoded
-            borderRadius: '8px',
-            padding: '10px',
-            boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
-          }}
-        >
-          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-            {vehicleNumber}
-          </div>
-          <div>Position: {`lat: ${position.lat}, lng: ${position.lng}`}</div>
-          <div>Speed: {speed}</div>
-          <div>Ph: {vehicle?.primaryPhoneNumber}</div>
-          <div>Owner: {vehicle?.owner}</div>
-          {/* <button
+          <div
             style={{
-              marginTop: '8px',
-              padding: '5px 10px',
-              background: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
+              color: "black",
+              fontFamily: "Arial, sans-serif",
+              background:
+                ignition === 0
+                  ? "#d1d5db"
+                  : speed <= 40
+                  ? "#86efac"
+                  : "#f87171", // TODO remove speedlimit hardcoded
+              borderRadius: "8px",
+              padding: "10px",
+              boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
             }}
-            onClick={handleButtonClick}
           >
-            View Travel Path
-          </button> */}
-        </div>
-
+            <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
+              {vehicleNumber}
+            </div>
+            <div>Position: {`lat: ${position.lat}, lng: ${position.lng}`}</div>
+            <div>Speed: {speed}</div>
+            <div>Ph: {vehicle?.primaryPhoneNumber}</div>
+            <div>Owner: {vehicle?.owner}</div>
+            <button
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
+              onClick={handleButtonClick}
+            >
+              Get Insights {">"}
+            </button>
+          </div>
         </>
       );
     };
 
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     const root = ReactDOM.createRoot(container);
     root.render(<InfoWindowContent />);
 
@@ -222,11 +226,11 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
 
     const handleContentClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('button')) {
+      if (!target.closest("button")) {
         infoWindowRef.current?.close();
       }
     };
-    container.addEventListener('click', handleContentClick);
+    container.addEventListener("click", handleContentClick);
 
     return () => {
       root.unmount();
@@ -236,7 +240,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
 
   return (
     <>
-    <Modal
+      <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         contentLabel="Detail"
@@ -258,9 +262,9 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
             <CloseIcon />
           </button>
         </div>
-        <TravelPath vehicleNumber={vehicleNumber} />
+        <Grafana vehicleNumber={vehicleNumber} />
       </Modal>
-      </>
+    </>
   );
   return null;
 };
