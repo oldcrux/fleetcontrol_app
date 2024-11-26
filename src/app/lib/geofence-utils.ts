@@ -22,7 +22,7 @@ export async function createGeofence(geofenceDataToSave: string) {
 }
 
 export async function searchGeofence(orgId: string, encodedViewport: string) {
-  console.log(`geofenceutils:searchGeofence: searching ${encodedViewport}`);
+  // console.log(`geofenceutils:searchGeofence: searching ${encodedViewport}`);
   const response = await axios.get(`${nodeServerUrl}/node/api/geofence/search?orgId=${orgId}&encodedViewport=${encodedViewport}`);
   return response.data;
 }

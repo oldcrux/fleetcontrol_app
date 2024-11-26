@@ -25,7 +25,8 @@ import { Vehicle } from "@/app/lib/types";
 import Modal from "react-modal";
 import CloseIcon from "@mui/icons-material/Close";
 import TravelPath from "./travel-path";
-import Grafana from "./grafana";
+import { Grafana } from "./grafana";
+
 
 type GeoVehicle = {
   key: string;
@@ -52,7 +53,6 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
   const [clicked, setClicked] = useState(false);
 
   const clusterer = useRef<MarkerClusterer | null>(null);
-
   useEffect(() => {
     if (!map) return;
     if (!clusterer.current) {
@@ -173,9 +173,9 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
     }
 
     const InfoWindowContent: React.FC = () => {
-      const handleButtonClick = (event: React.MouseEvent) => {
+      const getInsights = (event: React.MouseEvent) => {
         event.stopPropagation(); // Prevent the event from bubbling to the outer container
-        console.log(`Button clicked for vehicle: ${vehicleNumber}`);
+        // console.log(`Button clicked for vehicle: ${vehicleNumber}`);
         setModalIsOpen(true);
 
         // const url = `/vehicle-details/${vehicleNumber}`; // Example: dynamic URL for the vehicle
@@ -208,7 +208,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
             <div>Owner: {vehicle?.owner}</div>
             <button
               className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
-              onClick={handleButtonClick}
+              onClick={getInsights}
             >
               Get Insights {">"}
             </button>
@@ -240,7 +240,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
 
   return (
     <>
-      <Modal
+      {/* <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         contentLabel="Detail"
@@ -263,7 +263,8 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
           </button>
         </div>
         <Grafana vehicleNumber={vehicleNumber} />
-      </Modal>
+      </Modal> */}
+      <Grafana show={modalIsOpen} onClose={() => setModalIsOpen(false)} vehicleNumbers={vehicleNumber} />
     </>
   );
   return null;

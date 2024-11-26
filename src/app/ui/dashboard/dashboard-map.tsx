@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import {Map} from "@vis.gl/react-google-maps";
 
 import { createGeofence, searchGeofence } from "@/app/lib/geofence-utils";
@@ -30,10 +30,12 @@ export default function DashboardMap({
 }: {
   query: string;
 }) {
+  const searchParams = useSearchParams();
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [vehicles, setVehicles] = useState([]);
   // const drawingManager = dashboardDrawingManager()
   const drawingManager = geofenceDrawingManager();
+  const [searchParam, setSearchParam] = useState<string>();
 
   const { data: session } = useSession();
   const orgId = session?.user?.orgId;
@@ -106,13 +108,22 @@ export default function DashboardMap({
       try {
         const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
         // console.log(`bound values: ${encodedViewport}`);
-        eventSource = new EventSource(
-          `${nodeServerUrl}/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`
-        ); // Connect to SSE endpoint
+        const params = new URLSearchParams(searchParams);
+        
+        // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
+        let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}`;
+        const searchParam = params.get("query");
+        // console.log(`request param`, searchParam);
+        if(searchParam){
+          setSearchParam(searchParam);
+          path = `${path}&query=${searchParam}`;
+        }
+        // console.log(`request path`, path);
+        eventSource = new EventSource(`${nodeServerUrl}${path}`); // Connect to SSE endpoint
 
         eventSource.onmessage = (event: any) => {
           const eventData = JSON.parse(event.data);
-          // console.log(`all vehicles fetched=>`, event.data);
+          console.log(`all vehicles fetched=>`, event.data);
           if (eventData.length > 0) {
             const vehicle = eventData.map((event: any) => ({
               ignition:event.ignition,
@@ -143,7 +154,8 @@ export default function DashboardMap({
       }
     };
 
-  }, [viewport]);
+  }, []);
+// }, [viewport, searchParam]);
 
   useEffect(() => {
     if (!drawingManager) return;

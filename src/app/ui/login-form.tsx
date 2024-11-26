@@ -6,6 +6,7 @@ import { authenticate } from "../lib/actions";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Logo from "./logo";
+import { colors, Typography } from "@mui/material";
 
 export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -65,7 +66,10 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex-1 rounded-lg bg-blue-200 px-6 pb-4 pt-8">
         <div className="mb-10  w-full flex justify-center">
-          <Logo />
+          {/* <Logo /> */}
+          <Typography variant="h5" color="#1e40af" component="h1" id="modal-title" gutterBottom>
+          Fleet Dashboard
+        </Typography>
         </div>
         <h1 className={`mb-3 text-2xl text-blue-800`}>Sign In</h1>
         <div className="w-full">

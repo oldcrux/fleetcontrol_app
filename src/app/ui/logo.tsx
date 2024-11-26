@@ -1,14 +1,25 @@
-import Icon from '@mui/material/Icon';
-import CommuteIcon from '@mui/icons-material/Commute';
 import { lusitana, montserrat, roboto } from '@/app/ui/fonts';
+import Image from 'next/image';
+import { useSession } from "next-auth/react";
 
 export default function Logo() {
+  const { data: session, status } = useSession();
+  const orgId = session?.user?.orgId;
+
+  // console.log(`printing orgid in logo`, orgId);
   return (
     <div
       className={`${montserrat.className} flex flex-row items-center leading-none text-blue-600`}
     >
-      <CommuteIcon className="h-8 w-8 rotate-[15deg] fill-green-800" />
-      <p className="text-[24px] font-medium">BMC Corp.</p>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <Image
+        alt="CompanyLogo"
+        src={`/images/${orgId}.png`}
+        sizes="100vw"
+        width={300}
+        height={300}
+      />
+    </div>
     </div>
   );
 }
