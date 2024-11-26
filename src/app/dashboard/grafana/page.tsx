@@ -1,6 +1,6 @@
 "use client";
 
-import Grafana from "@/app/ui/dashboard/grafana";
+import Grafana from "@/app/ui/dashboard/grafana-modal";
 
 export default async function Page({
   params,
@@ -14,7 +14,7 @@ export default async function Page({
       {/* <TravelPath vehicleNumber={vehicleNumber} /> */}
       {/* <TravelPathLeaflet/> */}
 
-      <Grafana vehicleNumber={vehicleNumber} />
+      <Grafana url={vehicleNumber} />
     </>
   );
 }

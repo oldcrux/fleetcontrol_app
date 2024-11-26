@@ -14,6 +14,7 @@ import {
   type MRT_ColumnFiltersState,
   type MRT_SortingState,
   type MRT_RowVirtualizer,
+  type MRT_RowSelectionState,
   MRT_EditActionButtons,
   MRT_TableOptions,
   MRT_Row,
@@ -57,6 +58,10 @@ import {
 import { Vehicle } from "@/app/lib/types";
 import { useSession } from "next-auth/react";
 import { BulkCreateVehicle } from "./bulk-create-vehicle";
+import { Grafana } from "../dashboard/grafana";
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+// import { redirect } from "next/navigation";
+import { useRouter } from 'next/navigation'
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -70,6 +75,7 @@ type VehicleApiResponse = {
 const fetchSize = 25;
 
 const Vehicles = () => {
+  const router = useRouter();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef = useRef<MRT_RowVirtualizer>(null);
 
@@ -88,8 +94,11 @@ const Vehicles = () => {
   const { data: session } = useSession();
   const orgId = session?.user?.orgId as string;
   const userId = session?.user?.userId || "";
-
+  const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGrafanaModalOpen, setIsGrafanaModalOpen] = useState(false);
+  const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
+
   const handleBulkCreateVehicle = (data: any) => {
     // console.log('Saved Data:', data);
     setIsModalOpen(false);
@@ -117,6 +126,28 @@ const Vehicles = () => {
     };
     fetchGeofenceGroups();
   }, []);
+
+  const getInsights = (event: React.MouseEvent) => {
+    // console.info( rowSelection );
+    const selectedVehicles = Object.keys(rowSelection).filter((key) => rowSelection[key]);
+    console.info( selectedVehicles );
+    setSelectedVehicles(selectedVehicles);
+    if(selectedVehicles){
+      setIsGrafanaModalOpen(true);
+    }
+  };
+
+  
+  const seeOnDashboard = (event: React.MouseEvent) => {
+    // console.info( rowSelection );
+    const selectedVehicles = Object.keys(rowSelection).filter((key) => rowSelection[key]);
+    console.info( selectedVehicles );
+    // setSelectedVehicles(selectedVehicles);
+    if(selectedVehicles){
+      const vehicles = selectedVehicles.join(',');
+      router.push(`/dashboard?query=${vehicles}`);
+    }
+  };
 
   const columns = useMemo<MRT_ColumnDef<Vehicle>[]>(
     () => [
@@ -367,6 +398,32 @@ const Vehicles = () => {
     enableEditing: true,
     getRowId: (row) => row.vehicleNumber,
 
+    enableRowSelection:true,
+
+    
+    // muiTableBodyRowProps: ({ row }) => ({
+    //   onClick: () =>
+    //     setRowSelection((prev) => {
+    //       const isSelected = prev[row.id];
+    //       if (isSelected) {
+    //         // Remove the key when unselected
+    //         const { [row.id]: _, ...rest } = prev;
+    //         return rest;
+    //       } else {
+    //         // Add the key when selected
+    //         return {
+    //           ...prev,
+    //           [row.id]: true,
+    //         };
+    //       }
+    //     }),
+    //   selected: !!rowSelection[row.id], // Ensure it's a boolean
+    //   sx: {
+    //     cursor: 'pointer',
+    //   },
+    // }),
+    onRowSelectionChange: setRowSelection, //connect internal row selection state to your own
+
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h5">Create New Vehicle</DialogTitle>
@@ -436,7 +493,7 @@ const Vehicles = () => {
     renderTopToolbarCustomActions: ({ table }) => (
       <>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <Button
+      <Button disabled={Object.keys(rowSelection).length !== 0}
         onClick={() => {
           // console.log(`setting creating flag to true`);
           // setCreating(true);
@@ -451,10 +508,20 @@ const Vehicles = () => {
       >
         Create New Vehicle
       </Button>
-      <Button onClick={() => setIsModalOpen(true)}>
+      <Button disabled={Object.keys(rowSelection).length !== 0} onClick={() => setIsModalOpen(true)}>
        Bulk Create Vehicles</Button>
 
+       <Button disabled={Object.keys(rowSelection).length === 0} onClick={seeOnDashboard}>
+       See on Dashboard
+       </Button>
+
+       <Button disabled={Object.keys(rowSelection).length === 0} onClick={getInsights}>
+       Get Insights {">"} 
+       <OpenInNewIcon sx={{paddingLeft:1, fontSize:25, color: '#d5d7db'}}/>
+       </Button>
+
        <BulkCreateVehicle show={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleBulkCreateVehicle} />
+       <Grafana openInNewTab={true} show={isGrafanaModalOpen} onClose={() => setIsGrafanaModalOpen(false)} vehicleNumbers={selectedVehicles} />
        </div>
       </>
     ),
@@ -489,6 +556,7 @@ const Vehicles = () => {
       showProgressBars: isFetching,
       sorting,
       isSaving: isCreatingVehicle || isUpdatingVehicle || isDeletingVehicle,
+      rowSelection
     },
     rowVirtualizerInstanceRef, //get access to the virtualizer instance
     rowVirtualizerOptions: { overscan: 4 },

@@ -1,137 +1,32 @@
-import { fetchAppConfig } from "@/app/lib/vehicle-utils";
-import { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartOptions,
-} from "chart.js";
-import annotationPlugin from "chartjs-plugin-annotation";
+import React, { useState, useEffect } from "react";
+import Modal from "react-modal";
+import CloseIcon from "@mui/icons-material/Close";
+
+import ReactDOM from "react-dom";
 import { useSession } from "next-auth/react";
+import { fetchAppConfig } from "@/app/lib/vehicle-utils";
+import GrafanaModal from "./grafana-modal";
 
-// Register necessary chart components and annotation plugin
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  annotationPlugin
-);
+type JsonPopupProps = {
+  show: boolean,
+  onClose: () => void,
+  vehicleNumbers: string | string[],
+  openInNewTab?: boolean;
+};
 
-interface VehicleProps {
-  vehicleNumber: string;
-}
 
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    borderColor: string;
-    backgroundColor: string;
-    fill: boolean;
-    tension: number;
-    borderDash?: number[];
-  }[];
-}
-
-const Grafana: React.FC<VehicleProps> = ({ vehicleNumber }) => {
-    const [url, setUrl] = useState('');
+export const Grafana: React.FC<JsonPopupProps> = ({
+  show,
+  onClose,
+  vehicleNumbers,
+  openInNewTab = false, // Default to false
+}) => {
+  
+  const [url, setUrl] = useState('');
     const { data: session, status } = useSession();
   const orgId = session?.user?.orgId;
 
-//   const timeZone = 'Asia/Kolkata';
-//   useEffect(() => {
-//     const fetchSpeed = async () => {
-//       const speedValues = await fetchVehicleSpeed(vehicleNumber);
-//       console.log(
-//         `speed-chart:useEffect: speed fetched: ${JSON.stringify(speedValues)}`
-//       );
-
-//       const timestamps = speedValues.map((entry: any) =>
-//         new Date(entry.timestamp).toLocaleString('en-US', {
-//             timeZone: timeZone, // Specify the timezone
-//           })
-//       );
-//       const speeds = speedValues.map((entry: any) => entry.speed);
-
-//       // Set the borderDash property for zero value portions
-//       const borderDashArray = speeds.map((speed: any) =>
-//         speed === 0 ? [5, 5] : []
-//       ); // [5,5] creates a dotted line
-
-//       setChartData({
-//         labels: timestamps,
-//         datasets: [
-//           {
-//             label: "Speed",
-//             data: speeds,
-//             borderColor: "rgba(75,192,192,1)",
-//             backgroundColor: "rgba(75,192,192,0.2)",
-//             fill: true, // Area chart (line with fill)
-//             tension: 0.4, // Adds some smoothness to the curve
-//             borderDash: borderDashArray, // Apply dotted lines for 0 value portions
-//           },
-//         ],
-//       });
-//     };
-
-//     fetchSpeed().catch(console.error);
-//   }, [vehicleNumber]);
-
-//   if (!chartData) {
-//     return <div>Loading...</div>;
-//   }
-
-  // Chart options to draw the horizontal line at y = 10
-//   const options: ChartOptions<"line"> = {
-//     responsive: true,
-//     plugins: {
-//       legend: {
-//         display: false,
-//       },
-//       annotation: {
-//         annotations: {
-//           line1: {
-//             type: "line",
-//             yMin: 40, // Horizontal line at y = 10
-//             yMax: 40, // Keep the line at the same height
-//             borderColor: "#ef4444", // Red color for the line
-//             borderWidth: 2,
-//             label: {
-//               content: "Threshold",
-//               position: "center",
-//               font: {
-//                 size: 14,
-//                 weight: "bold",
-//               },
-//             },
-//           },
-//         },
-//       },
-//     },
-//     scales: {
-//       x: {
-//         type: "category", // Use category scale for x axis (timestamps)
-//       },
-//       y: {
-//         type: "linear", // Use linear scale for y axis (speed values)
-//         beginAtZero: true, // Optional: ensures y-axis starts from 0
-//       },
-//     },
-//   };
-
-
-useEffect(() => {
+  useEffect(() => {
     const fetchUrl = async () => {
       try {
         const fetchedUrl = await fetchAppConfig('grafanaDashboard1');
@@ -145,18 +40,101 @@ useEffect(() => {
     fetchUrl();
   }, []);
 
-  const finalUrl = `${url}${orgId}&&var-vehicleNumber=${vehicleNumber}`;
-  // console.log(finalUrl);
+  const queryString =
+    typeof vehicleNumbers === 'string'
+      ? `&var-vehicleNumber=${vehicleNumbers}`
+      : Array.isArray(vehicleNumbers)? vehicleNumbers.map((num:any) => `&var-vehicleNumber=${num}`).join('') : '';
+
+  const finalUrl = `${url}${orgId}${queryString}`;
+  
+  useEffect(() => {
+    if (openInNewTab && show) {
+      console.log(`final url in modal:`,finalUrl);
+      const newTab = window.open(finalUrl, "_blank");
+  
+      if (newTab) {
+        const interval = setInterval(() => {
+          if (newTab.closed) {
+            onClose();
+            clearInterval(interval);
+          }
+        }, 500);
+      }
+    }
+  }, [openInNewTab, show]);
+  if (openInNewTab) {
+    return null;
+  }
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      {url ? (
-        <iframe src={finalUrl} width="100%" height="100%" style={{ border: 'none' }} />
-      ) : (
-        <p>Loading...</p> // You can show a loading message while the URL is being fetched
-      )}
-    </div>
+    <>
+      <Modal
+        isOpen={show}
+        onRequestClose={onClose}
+        // onClose={onClose}
+        contentLabel="Detail"
+        ariaHideApp={false}
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.75)", // Optional: Adjust overlay background color
+          },
+          content: {
+            // leave content styles empty if using Tailwind classes
+          },
+        }}
+      >
+        <div className="absolute top-1 right-1 mr-2 mt-2">
+          <button
+            className="absolute top-1 right-1 -mr-3 -mt-3 z-30 text-black rounded-full w-5 h-5 flex items-center justify-center"
+            onClick={onClose}
+          >
+            <CloseIcon />
+          </button>
+        </div>
+        {/* <Grafana vehicleNumber={vehicleNumbers} /> */}
+        <GrafanaModal url={finalUrl} />
+      </Modal>
+    </>
   );
 };
 
-export default Grafana;
+const styles = {
+  overlay: {
+    // position: 'fixed',
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  popup: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    width: "400px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  },
+  textarea: {
+    width: "100%",
+    height: "150px",
+    marginBottom: "10px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+    padding: "8px",
+  },
+  buttons: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  button: {
+    padding: "8px 16px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    backgroundColor: "#0070f3",
+    color: "#fff",
+  },
+};

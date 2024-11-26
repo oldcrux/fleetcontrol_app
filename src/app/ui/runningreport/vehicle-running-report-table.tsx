@@ -27,7 +27,6 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { latestVehicleTelemetryReport } from '@/app/lib/telemetry-utils';
 import { generateVehicleExcel, generateVehicleExcelAndDownload } from './report-export';
-import { download } from 'export-to-csv'; 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
 //Your API response shape will probably be different. Knowing a total row count is important though.
