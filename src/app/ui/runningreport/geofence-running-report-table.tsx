@@ -15,7 +15,7 @@ import {
   type MRT_SortingState,
   type MRT_RowVirtualizer,
 } from 'material-react-table';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import {
   QueryClient,
   QueryClientProvider,
