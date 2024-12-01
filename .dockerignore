@@ -1,0 +1,9 @@
+node_modules
+*.log
+*.md
+.next/cache
+*.map
+.DS_Store
+coverage
+*.test.*
+*.spec.*

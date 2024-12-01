@@ -1,7 +1,6 @@
 "use client";
 
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import { Box, TextField } from '@mui/material';
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 

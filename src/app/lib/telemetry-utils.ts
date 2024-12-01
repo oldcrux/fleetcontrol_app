@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 import { Geofence } from './types';
-import { logInfo } from './logger';
+// import { logInfo } from './logger.ts';
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 

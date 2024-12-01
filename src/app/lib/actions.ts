@@ -1,6 +1,5 @@
 'use server';
 import { signIn, signOut } from '@/auth';
-import { logInfo } from './logger';
 
 interface AuthParams {
   userId: string;
@@ -12,7 +11,7 @@ export async function authenticate({ userId, password }: AuthParams) {
     if (typeof userId !== 'string' || typeof password !== 'string') {
       throw new Error('Invalid userId or password');
     }
-    logInfo(`Authenticating user ${userId}`);
+    // logInfo(`Authenticating user ${userId}`);
     const result = await signIn('credentials', {
       userId,
       password,

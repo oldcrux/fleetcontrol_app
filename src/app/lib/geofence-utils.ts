@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 import { Geofence } from './types';
-import { logInfo } from './logger';
+// import { logInfo } from './logger.ts';
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -21,9 +21,9 @@ export async function createGeofence(geofenceDataToSave: string) {
   }
 }
 
-export async function searchGeofence(orgId: string, encodedViewport: string) {
+export async function searchGeofence(orgId: string, encodedViewport: string, query: string) {
   // console.log(`geofenceutils:searchGeofence: searching ${encodedViewport}`);
-  const response = await axios.get(`${nodeServerUrl}/node/api/geofence/search?orgId=${orgId}&encodedViewport=${encodedViewport}`);
+  const response = await axios.get(`${nodeServerUrl}/node/api/geofence/search?orgId=${orgId}&encodedViewport=${encodedViewport}&vehicles=${query}`);
   return response.data;
 }
 

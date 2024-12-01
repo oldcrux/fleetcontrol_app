@@ -15,7 +15,13 @@ import {
   type MRT_SortingState,
   type MRT_RowVirtualizer,
 } from 'material-react-table';
-import { Box, Typography, Button, Tooltip } from '@mui/material';
+
+// import { Box, Typography, Button, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
+
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
   QueryClient,
@@ -308,7 +314,7 @@ const GeofenceReport = () => {
           justifyContent: 'flex-end', 
         }}
       >
-        <Tooltip title="Download latest vehicle report" arrow placement="top">
+        <Tooltip title="Download latest vehicle report" placement="top">
         <Button
           sx={{
             color:'grey',

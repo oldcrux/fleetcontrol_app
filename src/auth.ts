@@ -5,7 +5,7 @@ import { z } from 'zod';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import { AuthError } from 'next-auth';
-import { logDebug, logError, logInfo } from './app/lib/logger';
+// import { logDebug, logError, logInfo } from './app/lib/logger';
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 const maxage =  Number(process.env.AUTH_MAX_AGE) || 14400;
@@ -19,7 +19,7 @@ async function getUser(userId: string) {
     // console.log(`User Fetched.`, user);
     return user;
   } catch (error) {
-    logError('auth.ts: getUser: Failed to fetch user:', error);
+    // logError('auth.ts: getUser: Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
   }
 }
@@ -31,7 +31,7 @@ async function  getOrganization(orgId:string) {
     // console.log(`org fetched:`, org);
     return org[0];
   } catch (error) {
-    logError('auth.ts: getOrganization: Failed to fetch organization:', error);
+    // logError('auth.ts: getOrganization: Failed to fetch organization:', error);
     throw new Error('Failed to fetch getOrganization.');
   }
 }
@@ -45,18 +45,18 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
    },
    callbacks:{
     jwt({ token, user }) {
-      logInfo(`auth.ts: user object:`, user);
+      // logInfo(`auth.ts: user object:`, user);
       if (user) { // User is available during sign-in
         token.id = user.userId;
         token.userId = user.userId;
         token.orgId = user.orgId;
         token.user = user;
       }
-      logDebug(`auth.ts: token object:`, token);
+      // logDebug(`auth.ts: token object:`, token);
       return token;
     },
     session({ session, token }) {
-      logInfo(`auth.ts: Session callback called`);
+      // logInfo(`auth.ts: Session callback called`);
       session.user.id = token.id as string;
       session.user.userId = token.userId as string;
       session.user.orgId= token.orgId as string;
@@ -64,7 +64,7 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
       // session.user.orgLongitude = token.user.orgLongitude as string;
       // session.user=token.user as User;
       // session.expires = token.exp;
-      logDebug(`auth.ts: session object:`, session);
+      // logDebug(`auth.ts: session object:`, session);
       return session;
     },
    },
@@ -77,16 +77,16 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
           .object({ userId: z.string(), password: z.string().min(5) })
           .safeParse(credentials);
 
-          logInfo(`auth.ts: call came to auth.ts.`);
+          // logInfo(`auth.ts: call came to auth.ts.`);
 
         if (parsedCredentials.success) {
           const { userId, password } = parsedCredentials.data;
-          logInfo(`auth.ts: making db call to check user ${userId}`);
+          // logInfo(`auth.ts: making db call to check user ${userId}`);
           user = await getUser(userId);
           if (!user)
             return null;
 
-          logDebug(`auth.ts: user fetched:`, user);
+          // logDebug(`auth.ts: user fetched:`, user);
           const dbPassword = user.password;
         
           const passwordsMatch = await bcrypt.compare(password, dbPassword);
@@ -98,7 +98,7 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
           }
             
         }
-        logError('auth.ts: Invalid credentials');
+        // logError('auth.ts: Invalid credentials');
         return null;
       },
     })],
