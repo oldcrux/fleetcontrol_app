@@ -103,7 +103,7 @@ const VehicleModal = (label: any) => {
     enableColumnActions: false,
     enableSorting: false,
     enableGlobalFilter: false,
-    enableFilters: false,
+    enableFilters: true,
     enableDensityToggle:false
   });
 

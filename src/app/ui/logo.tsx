@@ -8,18 +8,19 @@ export default function Logo() {
 
   // console.log(`printing orgid in logo`, orgId);
   return (
-    <div
-      className={`${montserrat.className} flex flex-row items-center leading-none text-blue-600`}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+    // <div
+    //   className={`${montserrat.className} flex flex-row items-center leading-none text-blue-600`}
+    // >
+    <div className="flex flex-col items-center">
       <Image
         alt="CompanyLogo"
         src={`/images/${orgId}.png`}
         sizes="100vw"
-        width={300}
-        height={300}
+        width={100}
+        height={100}
+        className="object-contain"
       />
     </div>
-    </div>
+    // </div>
   );
 }

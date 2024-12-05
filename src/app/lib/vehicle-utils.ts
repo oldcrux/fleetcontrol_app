@@ -71,7 +71,7 @@ export async function searchVehicleByNumber(orgId: string, vehicleNumber: string
     // console.log(`vehicleutils:searchVehicle: query String ${query}`);
     const response = await axios.get(`${nodeServerUrl}/node/api/vehicle/search/vehicleNumber?orgId=${orgId}&vehicleNumber=${vehicleNumber}`);
 
-    console.log(`vehicleutils:searchVehicleByNumber: response received ${JSON.stringify(response.data)}`);
+    // console.log(`vehicleutils:searchVehicleByNumber: response received ${JSON.stringify(response.data)}`);
     const vehicle = response.data;
     return vehicle[0];
   } catch (error) {

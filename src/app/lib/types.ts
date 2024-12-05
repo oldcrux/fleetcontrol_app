@@ -64,7 +64,8 @@ export interface Shape{
   path?: any[],
   center?: google.maps.LatLng,
   radius: number,
-  name?: string,
+  tag?: string,
   overlay?: any,
+  id:string,
 }
 

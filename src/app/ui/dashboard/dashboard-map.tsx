@@ -207,13 +207,6 @@ export default function DashboardMap({ query }: { query: string }) {
           // defaultCenter={{ lat: orgLatitude, lng: orgLongitude }}
           gestureHandling={"greedy"}
           zoomControl={true}
-          // options={{
-          //   zoomControl: true,
-          //   fullscreenControl: false,
-          //   mapTypeControl: false,
-          //   streetViewControl: false,
-          //   rotateControl: false,
-          // }}
 
           mapId="da37f3254c6a6d1c" // TODO this is demo mapId. need to change it.
           // follow https://developers.google.com/maps/documentation/get-map-id
