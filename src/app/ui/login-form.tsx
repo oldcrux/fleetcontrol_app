@@ -1,5 +1,5 @@
 "use client";
-import { lusitana } from "@/app/ui/fonts";
+import { montserrat } from "@/app/ui/fonts";
 import { Button } from "@/app/ui/button";
 import { useEffect, useState } from "react";
 import { authenticate } from "../lib/actions";
@@ -65,11 +65,15 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex-1 rounded-lg bg-blue-200 px-6 pb-4 pt-8">
-        <div className="mb-10  w-full flex justify-center">
-          {/* <Logo /> */}
-          <Typography variant="h5" color="#1e40af" component="h1" id="modal-title" gutterBottom>
+        <div className="mb-10  w-full flex flex-col items-center">
+        <div
+          className={`${montserrat.className} text-xl text-blue-600`}>
+          OldCrux
+        </div>  
+        <div
+          className={`text-3xl text-blue-600`}>
           Fleet Dashboard
-        </Typography>
+        </div> 
         </div>
         <h1 className={`mb-3 text-2xl text-blue-800`}>Sign In</h1>
         <div className="w-full">

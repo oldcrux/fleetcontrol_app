@@ -169,7 +169,7 @@ export default function Chart() {
             backgroundColor: "rgba(0, 0, 0, 0.75)", // Optional: Adjust overlay background color
           },
           content: {
-            // You can leave content styles empty if using Tailwind classes
+            // Leave content styles empty if using Tailwind classes
           },
         }}
       >

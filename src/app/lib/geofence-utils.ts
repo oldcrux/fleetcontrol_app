@@ -21,18 +21,48 @@ export async function createGeofence(geofenceDataToSave: string) {
   }
 }
 
+export async function updateGeofence(geofenceDataToSave: any) {
+  
+  console.log(`Geofence data to save:`, geofenceDataToSave);
+    // console.log(`geofenceutils:updateGeofence: updating geofence ${JSON.stringify(geofenceDataToSave)}`, geofenceDataToSave);
+    const response = await axios.post(`${nodeServerUrl}/node/api/geofence/update`, geofenceDataToSave, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+    // console.log(response);
+    const status = response.status;
+}
+
 export async function searchGeofence(orgId: string, encodedViewport: string, query: string) {
   // console.log(`geofenceutils:searchGeofence: searching ${encodedViewport}`);
   const response = await axios.get(`${nodeServerUrl}/node/api/geofence/search?orgId=${orgId}&encodedViewport=${encodedViewport}&vehicles=${query}`);
   return response.data;
 }
 
-export async function deleteGeofenceLocation(orgId: string, locationTag: string) {
+export async function fetchGeofence(orgId: string, query: string) {
+  // console.log(`geofenceutils:searchGeofence: searching ${query}`);
+  const response = await axios.get(`${nodeServerUrl}/node/api/geofence/search?orgId=${orgId}&${query}`);
+  // console.log(`geofenceutils:searchGeofence: searching`, response.data);
+  return response.data;
+}
+
+export async function deleteGeofenceLocation(orgId: string, locationTag: string, id: string) {
   const payload={
-    orgId: orgId, // TODO remove hardcoding
-    tag: locationTag
+    orgId: orgId,
+    tag: locationTag,
+    id: id,
   }
   const response = await axios.post(`${nodeServerUrl}/node/api/geofence/delete`, payload);
+  return response.data;
+}
+
+export async function deleteGeofenceLocationById(orgId: string, id: string) {
+  const payload={
+    orgId: orgId,
+    id: id
+  }
+  const response = await axios.post(`${nodeServerUrl}/node/api/geofence/delete/id`, payload);
   return response.data;
 }
 
