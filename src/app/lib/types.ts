@@ -57,6 +57,7 @@ export interface Vehicle {
   orgId: string,
   createdBy: string,
   isActive: string,
+  timestamp: string,
 }
 
 export interface Shape{

@@ -105,7 +105,7 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
                   color:
                     vehicle.ignition === 0
                       ? "#454141"
-                      : vehicle.speed <= 40
+                      : vehicle.speed <= 45
                       ? "#86efac"
                       : "#f25050",
                 }} // TODO remove speedlimit hardcoded
