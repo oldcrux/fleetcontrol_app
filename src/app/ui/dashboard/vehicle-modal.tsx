@@ -7,7 +7,7 @@ import {
   type MRT_RowVirtualizer,
 } from "material-react-table";
 import { Vehicle } from "@/app/lib/types";
-import { fetchAllIdleVehicles, fetchAllRunningVehicles } from "@/app/lib/vehicle-utils";
+import { fetchAllIdleVehicles, fetchAllRunningVehicles, fetchAllSpeedingVehicles, fetchGhostVehicles, fetchVehiclesIgnitionOff } from "@/app/lib/vehicle-utils";
 import { useSession } from "next-auth/react";
 
 const VehicleModal = (label: any) => {
@@ -43,6 +43,26 @@ const VehicleModal = (label: any) => {
         accessorKey: "geofenceLocationGroupName",
         header: "Geofence Group",
       },
+      {
+        accessorKey: "timestamp",
+        header: "Last Seen",
+        Cell: ({ row }) => {
+          const timestamp = row.getValue('timestamp') as string;
+          if (!timestamp || isNaN(new Date(timestamp as string).getTime())) {
+            return <span>-</span>; // Return placeholder for null or invalid date
+          }
+          const localTime = new Date(timestamp).toLocaleString('en-US', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          });
+          return <span>{localTime}</span>;
+        },
+      },
     ],
     []
     //end
@@ -57,15 +77,23 @@ const VehicleModal = (label: any) => {
 
   useEffect(() => {
     const vehicles = async () => {
-      // const orgId = 'bmc';
       console.log(`orgId fetched from session: ${orgId}`);
       if (typeof window !== "undefined") {
-        if (label.label === "Idle") {
+        if (label.label === "Ghost") {
+          const offVehicles = await fetchGhostVehicles(orgId as string);
+          setData(offVehicles);
+        } else if (label.label === "Off") {
+          const offVehicles = await fetchVehiclesIgnitionOff(orgId as string);
+          setData(offVehicles);
+        } else if (label.label === "Idle") {
           const idleVehicles = await fetchAllIdleVehicles(orgId as string);
           setData(idleVehicles);
         } else if (label.label === "Running") {
           const runningVehicles = await fetchAllRunningVehicles(orgId as string);
           setData(runningVehicles);
+        } else if (label.label === "Speeding") {
+          const speedingVehicles = await fetchAllSpeedingVehicles(orgId as string);
+          setData(speedingVehicles);
         }
         setIsLoading(false);
       }

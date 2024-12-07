@@ -68,12 +68,15 @@ export default function Chart() {
         ); // Connect to SSE endpoint
 
         eventSource.onmessage = (event: { data: string }) => {
-          const runningVehicleCount = JSON.parse(event.data);
+          const runningVehicles = JSON.parse(event.data);
           // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
-          let idleVehicleCount = allVehicleCount - runningVehicleCount;
+          let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
           setData([
-            { label: "Running", value: runningVehicleCount, color: "#4ade80" },
-            { label: "Idle", value: idleVehicleCount, color: "#9ca3af" },
+            { label: "Ghost", value: totalGhostCount, color: "#5c5c5e" },
+            { label: "Off", value: runningVehicles.ignitionOffVehiclesCount, color: "#5c5c5e" },
+            { label: "Idle", value: runningVehicles.idleVehiclesCount, color: "#7b7b85" },
+            { label: "Running", value: runningVehicles.runningVehiclesCount, color: "#4ade80" },
+            { label: "Speeding", value: runningVehicles.speedingVehiclesCount, color: "#f25050" },
           ]);
         };
       } catch (error) {
@@ -105,16 +108,16 @@ export default function Chart() {
     ],
   };
 
-  const pieChartOptions = {
-    onClick: (event: any, elements: any) => {
-      // console.log(`onclick: ${elements[0]}`);
-      if (elements.length > 0) {
-        const index = elements[0].index;
-        setSelectedData(data[index]);
-        setModalIsOpen(true);
-      }
-    },
-  };
+  // const pieChartOptions = {
+  //   onClick: (event: any, elements: any) => {
+  //     // console.log(`onclick: ${elements[0]}`);
+  //     if (elements.length > 0) {
+  //       const index = elements[0].index;
+  //       setSelectedData(data[index]);
+  //       setModalIsOpen(true);
+  //     }
+  //   },
+  // };
 
   const barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
@@ -122,6 +125,33 @@ export default function Chart() {
       legend: {
         display: false,
       },
+      tooltip:{
+        callbacks:{
+          label: (tooltipItem) => {
+            const label = tooltipItem.label;
+            const dataValue = tooltipItem.raw;
+
+            // Customize the tooltip label based on the bar's label
+            if (label === 'Ghost') {
+              return `Vehicle that never sent data: ${dataValue}`;
+            } else if (label === 'Off') {
+              return `Vehicle engine turned off: ${dataValue}`;
+            }
+            else if (label === 'Idle') {
+              return `Vehicle engine is on, but not running: ${dataValue}`;
+            }
+            else if (label === 'Running') {
+              return `Vehicle moving at speed <=45 kmph: ${dataValue}`; //TODO remove speed hardcoding
+            }
+            else if (label === 'Speeding') {
+              return `Vehicle speeding at >45 kmph: ${dataValue}`; //TODO remove speed hardcoding
+            }
+  
+            // Default tooltip for other labels
+            return `${label}: ${dataValue}`;
+          }
+        }
+      }
     },
     indexAxis: 'y',
     scales: {
@@ -136,11 +166,18 @@ export default function Chart() {
         ticks: {
           color: (context) => {
             const label = context.tick.label;
-            if (label === 'Running') {
-              return '#4ade80';
+            if (label === 'Ghost') {
+              return '#5c5c5e';
+            } else if (label === 'Off') {
+              return '#5c5c5e';
             } else if (label === 'Idle') {
-              return '#9ca3af';
+              return '#7b7b85';
+            } else if (label === 'Running') {
+              return '#4ade80';
+            } else if (label === 'Speeding') {
+              return '#f25050';
             }
+
           },
         },
       }

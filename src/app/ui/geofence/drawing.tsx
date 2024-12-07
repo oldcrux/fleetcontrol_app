@@ -97,6 +97,9 @@ const Drawing = () => {
     const map = drawingManager?.getMap();
     const fetchGeofences = async () => {
       if (geofenceLocationGroup) {
+
+        cleanupShapes();
+
         const query = `geofenceLocationGroupName=${geofenceLocationGroup}`;
         // console.log(`useEffect called with query`, query);
         const geofences = await fetchGeofence(orgId as string, query);
@@ -145,20 +148,24 @@ const Drawing = () => {
               radius: geofence.radius || null,
             };
           });
-          console.log(`shapes: `, newShapes);
+          // console.log(`shapes: `, newShapes);
           setShapes(newShapes);
         } else {
-          shapes.forEach((shape) => {
-            if (shape.overlay) {
-              shape.overlay.setMap(null);
-            }
-          });
-          setShapes([]);
+          cleanupShapes();
         }
       }
     };
     fetchGeofences().catch(console.error);
   }, [geofenceLocationGroup]);
+
+  const cleanupShapes = () => {
+    shapes.forEach((shape) => {
+      if (shape.overlay) {
+        shape.overlay.setMap(null);
+      }
+    });
+    setShapes([]);
+  }
 
   const saveShapes = () => {
     const shapeData = shapes.map((shape) => {
@@ -208,6 +215,9 @@ const Drawing = () => {
     const value = e.target.value;
     setGeofenceLocationGroup(value); // Immediate update for input typing
     debouncedSetGroup(value); // Debounced side-effect
+    if(!value){
+      cleanupShapes();
+    }
   };
 
   const handleInputChange = (index: any, value: any) => {
