@@ -26,6 +26,7 @@ import Modal from "react-modal";
 import CloseIcon from "@mui/icons-material/Close";
 import TravelPath from "./travel-path";
 import { Grafana } from "./grafana";
+import { off_vehicle_color, running_vehicle_color, speeding_vehicle_color } from "../util/color_picker";
 
 
 type GeoVehicle = {
@@ -91,6 +92,7 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
       {props.vehicles.map((vehicle: GeoVehicle) => (
         <React.Fragment key={vehicle.key}>
           <AdvancedMarkerWithRef
+            key={vehicle.key}
             position={vehicle.location}
             ref={(marker) => setMarkerRef(marker, vehicle.key)}
             onClick={(marker) => {
@@ -104,10 +106,10 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
                 sx={{
                   color:
                     vehicle.ignition === 0
-                      ? "#454141"
+                      ? off_vehicle_color
                       : vehicle.speed <= 45
-                      ? "#86efac"
-                      : "#f25050",
+                      ? running_vehicle_color
+                      : speeding_vehicle_color,
                 }} // TODO remove speedlimit hardcoded
               />
             </div>
@@ -191,7 +193,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
               background:
                 ignition === 0
                   ? "#d1d5db"
-                  : speed <= 40
+                  : speed <= 45
                   ? "#86efac"
                   : "#f87171", // TODO remove speedlimit hardcoded
               borderRadius: "8px",
