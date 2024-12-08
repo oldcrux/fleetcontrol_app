@@ -18,12 +18,12 @@ interface Shape {
   radius: number;
 }
 
-interface Viewport {
-  north: number | null;
-  south: number | null;
-  east: number | null;
-  west: number | null;
-}
+// interface Viewport {
+//   north: number | null;
+//   south: number | null;
+//   east: number | null;
+//   west: number | null;
+// }
 
 export default function DashboardMap({ query }: { query: string }) {
   const searchParams = useSearchParams();
@@ -38,43 +38,43 @@ export default function DashboardMap({ query }: { query: string }) {
   const orgLatitude = Number(session?.user?.orgLatitude);
   const orgLongitude = Number(session?.user?.orgLongitude);
 
-  const [viewport, setViewport] = useState<Viewport>({
-    north: null,
-    south: null,
-    east: null,
-    west: null,
-  });
+  // const [viewport, setViewport] = useState<Viewport>({
+  //   north: null,
+  //   south: null,
+  //   east: null,
+  //   west: null,
+  // });
 
   // Handle bounds change and debounce the loading function to avoid excessive calls
-  const handleBoundsChanged = useCallback(() => {
-    if (!drawingManager?.getMap()) return;
-    const bounds = drawingManager?.getMap()?.getBounds();
+  // const handleBoundsChanged = useCallback(() => {
+  //   if (!drawingManager?.getMap()) return;
+  //   const bounds = drawingManager?.getMap()?.getBounds();
 
-    const north = bounds?.getNorthEast().lat() ?? null;
-    const south = bounds?.getSouthWest().lat() ?? null;
-    const east = bounds?.getNorthEast().lng() ?? null;
-    const west = bounds?.getSouthWest().lng() ?? null;
+  //   const north = bounds?.getNorthEast().lat() ?? null;
+  //   const south = bounds?.getSouthWest().lat() ?? null;
+  //   const east = bounds?.getNorthEast().lng() ?? null;
+  //   const west = bounds?.getSouthWest().lng() ?? null;
 
-    // console.log(`bound values: ${east}, ${west}, ${north}, ${south}`);
-    setViewport({ north, south, east, west });
-  }, [drawingManager?.getMap()]);
+  //   // console.log(`bound values: ${east}, ${west}, ${north}, ${south}`);
+  //   setViewport({ north, south, east, west });
+  // }, [drawingManager?.getMap()]);
 
-  useEffect(() => {
-    const map = drawingManager?.getMap();
-    if (!map) return;
+  // useEffect(() => {
+  //   const map = drawingManager?.getMap();
+  //   if (!map) return;
 
-    // Add the event listener to the map for bounds_changed
-    const listener = map.addListener("bounds_changed", handleBoundsChanged);
+  //   // Add the event listener to the map for bounds_changed
+  //   const listener = map.addListener("bounds_changed", handleBoundsChanged);
 
-    // Clean up the listener on component unmount
-    return () => google.maps.event.removeListener(listener);
-  }, [drawingManager, handleBoundsChanged]);
+  //   // Clean up the listener on component unmount
+  //   return () => google.maps.event.removeListener(listener);
+  // }, [drawingManager, handleBoundsChanged]);
 
   useEffect(() => {
     const fetchGeofences = async () => {
-      const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
+      // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
       // console.log(`encodedViewport from session: ${encodedViewport}`);
-
+      const encodedViewport = '';
       const params = new URLSearchParams(searchParams);
       const searchParam = params.get("query");
       // console.log(`request param`, searchParam);
@@ -109,20 +109,21 @@ export default function DashboardMap({ query }: { query: string }) {
       }
     };
     fetchGeofences().catch(console.error);
-  }, [viewport]);
+  }, []);
+  // }, [viewport]);
 
   useEffect(() => {
     let eventSource: any;
     const fetchRunningVehicles = async () => {
       try {
-        const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
+        // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
         // console.log(`bound values: ${encodedViewport}`);
         const params = new URLSearchParams(searchParams);
 
         // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
         let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}`;
         const searchParam = params.get("query");
-        // console.log(`request param`, searchParam);
+        // console.log(`request param received`, searchParam);
         if (searchParam) {
           setSearchParam(searchParam);
           path = `${path}&query=${searchParam}`;
@@ -200,14 +201,14 @@ export default function DashboardMap({ query }: { query: string }) {
 
   return (
     <>
-      <div className="h-screen p-2">
+      <div className="h-screen lg:p-2">
         <Map
           defaultZoom={14}
           defaultCenter={{ lat: 20.2827, lng: 85.8427 }}
           // defaultCenter={{ lat: orgLatitude, lng: orgLongitude }}
           gestureHandling={"greedy"}
           zoomControl={true}
-
+          // mapTypeId="satellite"
           mapId="da37f3254c6a6d1c" // TODO this is demo mapId. need to change it.
           // follow https://developers.google.com/maps/documentation/get-map-id
         />

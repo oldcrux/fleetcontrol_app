@@ -18,6 +18,7 @@ import { getVehicleCounts } from "@/app/lib/vehicle-utils";
 import VehicleModal from "./vehicle-modal";
 import { useSession } from "next-auth/react";
 import CloseIcon from "@mui/icons-material/Close";
+import { ghost_vehicle_color, idle_vehicle_color, off_vehicle_color, running_vehicle_color, speeding_vehicle_color } from "../util/color_picker";
 
 // Register the necessary components
 // ChartJS.register(ArcElement, Tooltip, Legend);
@@ -72,11 +73,11 @@ export default function Chart() {
           // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
           let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
           setData([
-            { label: "Ghost", value: totalGhostCount, color: "#5c5c5e" },
-            { label: "Off", value: runningVehicles.ignitionOffVehiclesCount, color: "#5c5c5e" },
-            { label: "Idle", value: runningVehicles.idleVehiclesCount, color: "#7b7b85" },
-            { label: "Running", value: runningVehicles.runningVehiclesCount, color: "#4ade80" },
-            { label: "Speeding", value: runningVehicles.speedingVehiclesCount, color: "#f25050" },
+            { label: "Ghost", value: totalGhostCount, color: ghost_vehicle_color },
+            { label: "Off", value: runningVehicles.ignitionOffVehiclesCount, color: off_vehicle_color},
+            { label: "Idle", value: runningVehicles.idleVehiclesCount, color: idle_vehicle_color },
+            { label: "Running", value: runningVehicles.runningVehiclesCount, color: running_vehicle_color },
+            { label: "Speeding", value: runningVehicles.speedingVehiclesCount, color: speeding_vehicle_color },
           ]);
         };
       } catch (error) {
@@ -167,15 +168,15 @@ export default function Chart() {
           color: (context) => {
             const label = context.tick.label;
             if (label === 'Ghost') {
-              return '#5c5c5e';
+              return ghost_vehicle_color;
             } else if (label === 'Off') {
-              return '#5c5c5e';
+              return off_vehicle_color;
             } else if (label === 'Idle') {
-              return '#7b7b85';
+              return idle_vehicle_color;
             } else if (label === 'Running') {
-              return '#4ade80';
+              return running_vehicle_color;
             } else if (label === 'Speeding') {
-              return '#f25050';
+              return speeding_vehicle_color;
             }
 
           },
