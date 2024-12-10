@@ -5,14 +5,16 @@ declare module 'next-auth' {
   interface User {
     // Id?: string;
     userId?:string;
-    orgId?: string;
+    role?:string;
+    primaryOrgId?: string;
+    secondaryOrgId?: string;
     orgLatitude?: string;
     orgLongitude?: string;
-    id?: string
-    name?: string | null
-    email?: string | null
+    id?: string;
+    name?: string | null;
+    email?: string | null;
     emailVerified?: Date | null;
-    image?: string | null
+    image?: string | null;
   }
 
   interface Session {

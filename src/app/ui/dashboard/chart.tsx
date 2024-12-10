@@ -50,7 +50,8 @@ export default function Chart() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<ChartData>();
   const { data: session, status } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : '';
 
   useEffect(() => {
     let eventSource: any;
@@ -58,19 +59,18 @@ export default function Chart() {
       try {
         // console.log(`session status: ${status}`);
         // console.log(`orgId fetched from session: ${orgId}`);
-        const allVehicleCount = await getVehicleCounts(orgId as string);
+        const allVehicleCount = await getVehicleCounts(orgId as string, vendorId as string);
         // console.log(`all vehicle count fetched - ${allVehicleCount}`);
         // console.log("checking type of - " + typeof allVehicleCount);
         // setallVehicleCountData(allVehicleCount);
 
         // console.log(`reading session variables: ${orgId}`);
         eventSource = new EventSource(
-          `${nodeServerUrl}/node/api/vehicleTelemetryData/fetchRunningCountSSE?orgId=${orgId}`
-        ); // Connect to SSE endpoint
+          `${nodeServerUrl}/node/api/vehicleTelemetryData/fetchRunningCountSSE?orgId=${orgId}&vendorId=${vendorId}`); // Connect to SSE endpoint
 
         eventSource.onmessage = (event: { data: string }) => {
           const runningVehicles = JSON.parse(event.data);
-          // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
+          console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
           let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
           setData([
             { label: "Ghost", value: totalGhostCount, color: ghost_vehicle_color },

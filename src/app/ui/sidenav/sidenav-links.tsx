@@ -8,15 +8,18 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import { useSession } from "next-auth/react";
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
+
 const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeOutlinedIcon },
-  { name: 'Geofences', href: '/dashboard/geofences', icon: LocationOnIcon },
-  { name: 'Vehicles',href: '/dashboard/vehicles', icon: CommuteIcon,},
-  { name: 'Vehicle Telemetry Report', href: '/dashboard/reports', icon: AssessmentIcon },
-  // { name: 'Users', href: '/dashboard/users', icon: PeopleOutlineOutlinedIcon },
+  { name: 'Home', href: '/dashboard', icon: HomeOutlinedIcon, roles:['system', 'admin', 'view'] },
+  { name: 'Geofences', href: '/dashboard/geofences', icon: LocationOnIcon, roles:['system', 'admin'] },
+  { name: 'Vehicles',href: '/dashboard/vehicles', icon: CommuteIcon, roles:['system', 'admin', 'view']},
+  { name: 'Vehicle Telemetry Report', href: '/dashboard/reports', icon: AssessmentIcon, roles:['system', 'admin', 'view'] },
+  { name: 'Vendors', href: '/dashboard/vendors', icon: PeopleOutlineOutlinedIcon, roles:['system', 'admin'] },
+  // { name: 'Users', href: '/dashboard/users', icon: PeopleOutlineOutlinedIcon, roles:['system', 'admin'] },
 ];
 
 interface SideNavLinksProps {
@@ -26,9 +29,14 @@ interface SideNavLinksProps {
 const SideNavLinks: React.FC<SideNavLinksProps> = ({ isCollapsed }) =>  {
   const pathname = usePathname();
 
+  const { data: session } = useSession();
+  const userRole = session?.user?.role as string;
+
   return (
     <>
-      {links.map((link) => {
+    {links
+      .filter((link) => link.roles.includes(userRole))
+      .map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link
@@ -42,11 +50,11 @@ const SideNavLinks: React.FC<SideNavLinksProps> = ({ isCollapsed }) =>  {
             )}
           >
             <LinkIcon className="w-6" />
-            <p className="hidden md:block">{ !isCollapsed && link.name}</p>
+            <p className="hidden md:block">{!isCollapsed && link.name}</p>
           </Link>
         );
       })}
-    </>
+  </>
   );
 }
 
