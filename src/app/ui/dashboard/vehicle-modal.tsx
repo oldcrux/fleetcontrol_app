@@ -13,7 +13,8 @@ import { useSession } from "next-auth/react";
 const VehicleModal = (label: any) => {
   
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : null;
 
   // console.log(`calling modal table with label: ${JSON.stringify(label.label)}`);
   const columns = useMemo<MRT_ColumnDef<Vehicle>[]>(
@@ -80,19 +81,19 @@ const VehicleModal = (label: any) => {
       console.log(`orgId fetched from session: ${orgId}`);
       if (typeof window !== "undefined") {
         if (label.label === "Ghost") {
-          const offVehicles = await fetchGhostVehicles(orgId as string);
+          const offVehicles = await fetchGhostVehicles(orgId as string, vendorId as string);
           setData(offVehicles);
         } else if (label.label === "Off") {
-          const offVehicles = await fetchVehiclesIgnitionOff(orgId as string);
+          const offVehicles = await fetchVehiclesIgnitionOff(orgId as string, vendorId as string);
           setData(offVehicles);
         } else if (label.label === "Idle") {
-          const idleVehicles = await fetchAllIdleVehicles(orgId as string);
+          const idleVehicles = await fetchAllIdleVehicles(orgId as string, vendorId as string);
           setData(idleVehicles);
         } else if (label.label === "Running") {
-          const runningVehicles = await fetchAllRunningVehicles(orgId as string);
+          const runningVehicles = await fetchAllRunningVehicles(orgId as string, vendorId as string);
           setData(runningVehicles);
         } else if (label.label === "Speeding") {
-          const speedingVehicles = await fetchAllSpeedingVehicles(orgId as string);
+          const speedingVehicles = await fetchAllSpeedingVehicles(orgId as string, vendorId as string);
           setData(speedingVehicles);
         }
         setIsLoading(false);

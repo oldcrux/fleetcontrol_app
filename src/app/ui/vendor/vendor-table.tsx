@@ -13,7 +13,6 @@ import {
 import { useSession } from "next-auth/react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button } from '../button';
-import { deleteGeofenceLocation, deleteGeofenceLocationById, updateGeofence } from '@/app/lib/geofence-utils';
 
 import {
     useQueryClient,
@@ -40,7 +39,7 @@ type Geofence = {
     id:string,
 }
 
-const Geofences = () => {
+const Vendors = () => {
   //data and fetching state
   const [data, setData] = useState<Geofence[]>([]);
   const [isError, setIsError] = useState(false);
@@ -162,14 +161,14 @@ const Geofences = () => {
     //   setValidationErrors({});
     // console.log(`updating values`, values, row.id);
     const geofenceData = {...values, id: row.id};
-      await updateGeofence(geofenceData);
+    //   await updateGeofence(geofenceData);
       table.setEditingRow(null); //exit editing mode
     };
 
   //DELETE action
   const openDeleteConfirmModal = async (row: MRT_Row<Geofence>) => {
     if (window.confirm(`Are you sure you want to delete geofence ${row.original.tag} ?`)) {
-      await deleteGeofenceLocationById(orgId as string, row.id);
+    //   await deleteGeofenceLocationById(orgId as string, row.id);
     }
     setIsRefetching(true);
   };
@@ -278,4 +277,4 @@ const Geofences = () => {
 //     });
 //   }
 
-export default Geofences;
+export default Vendors;

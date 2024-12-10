@@ -34,7 +34,8 @@ export default function DashboardMap({ query }: { query: string }) {
   const [searchParam, setSearchParam] = useState<string>();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : null;
   const orgLatitude = Number(session?.user?.orgLatitude);
   const orgLongitude = Number(session?.user?.orgLongitude);
 
@@ -119,9 +120,9 @@ export default function DashboardMap({ query }: { query: string }) {
         // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
         // console.log(`bound values: ${encodedViewport}`);
         const params = new URLSearchParams(searchParams);
-
+        
         // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
-        let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}`;
+        let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&vendorId=${vendorId}`;
         const searchParam = params.get("query");
         // console.log(`request param received`, searchParam);
         if (searchParam) {

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 
 export default function Logo() {
   const { data: session, status } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
 
   // console.log(`printing orgid in logo`, orgId);
   return (

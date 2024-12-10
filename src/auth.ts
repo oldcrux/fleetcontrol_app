@@ -1,4 +1,4 @@
-import NextAuth, { User } from 'next-auth';
+import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
@@ -49,22 +49,26 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
       if (user) { // User is available during sign-in
         token.id = user.userId;
         token.userId = user.userId;
-        token.orgId = user.orgId;
+        token.primaryOrgId = user.primaryOrgId;
+        token.secondaryOrgId = user.secondaryOrgId;
+        token.role = user.role;
         token.user = user;
       }
-      // logDebug(`auth.ts: token object:`, token);
+      // console.log(`auth.ts: token object:`, token);
       return token;
     },
     session({ session, token }) {
       // logInfo(`auth.ts: Session callback called`);
       session.user.id = token.id as string;
       session.user.userId = token.userId as string;
-      session.user.orgId= token.orgId as string;
+      session.user.role = token.role as string;
+      session.user.primaryOrgId= token.primaryOrgId as string;
+      session.user.secondaryOrgId= token.secondaryOrgId as string;
       // session.user.orgLatitude = token.user.orgLatitude as string;
       // session.user.orgLongitude = token.user.orgLongitude as string;
       // session.user=token.user as User;
       // session.expires = token.exp;
-      // logDebug(`auth.ts: session object:`, session);
+      // console.log(`auth.ts: session object:`, session);
       return session;
     },
    },
@@ -96,7 +100,6 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
             // user.orgLongitude = org.longitude;
             return user;
           }
-            
         }
         // logError('auth.ts: Invalid credentials');
         return null;

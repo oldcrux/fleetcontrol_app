@@ -1,4 +1,4 @@
-import VehicleTable from "@/app/ui/vehicles/vehicle-table";
+import VehicleTable from "@/app/ui/vehicle/vehicle-table";
 
 export default async function Page({
   searchParams,

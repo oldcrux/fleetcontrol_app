@@ -165,10 +165,10 @@ export async function fetchAllVehicleTelemetryData() {
 }
 
 // In Use
-export async function getVehicleCounts(orgId: string) {
+export async function getVehicleCounts(orgId: string, vendorId: string) {
 
   const allData = await
-    axios.get(`${nodeServerUrl}/node/api/vehicle/count/${orgId}`); // Fetching all vehicle count
+    axios.get(`${nodeServerUrl}/node/api/vehicle/count?orgId=${orgId}&vendorId=${vendorId}`); // Fetching all vehicle count
 
   const allVehicleCount = parseInt(allData.data)
   // console.log(`data:getVehicleCounts: all vehicle count == ${allVehicleCount} `);
@@ -177,10 +177,10 @@ export async function getVehicleCounts(orgId: string) {
 }
 
 
-export async function getRunningVehicleCountSSE(orgId: string) {
+export async function getRunningVehicleCountSSE(orgId: string, vendorId: string) {
   // console.log(`vehicleutils:getRunningVehicleCountSSE: Entering with orgId ${orgId}`)
   const runningResponse = await
-    axios.get(`${nodeServerUrl}/node/api/vehicleTelemetryData/fetchRunningCountSSE?orgId=${orgId}`); // Fetching running vehicle count from questdb
+    axios.get(`${nodeServerUrl}/node/api/vehicleTelemetryData/fetchRunningCountSSE?orgId=${orgId}&vendorId=${vendorId}`); // Fetching running vehicle count from questdb
 
   // console.log(`all vehicle count ${allResponse.data.size} and running vehicles count ${runningResponse.data}`);
   // const allVehicleCount = allResponse.data.size;
@@ -200,53 +200,53 @@ export async function triggerAllReportGeneration() {
   await axios.get(`${nodeServerUrl}/node/api/job/report/job/create?orgId=${orgId}&queueName=reportGenerationQueue`);
 }
 
-export async function fetchGhostVehicles(orgId: string) {
+export async function fetchGhostVehicles(orgId: string, vendorId: string) {
   // console.log(`vehicleutils:fetchGhostVehicles: Entering with orgId ${orgId}`)
   const response = await
-    axios.get(`${nodeServerUrl}/node/api/vehicle/ghost?orgId=${orgId}`);
+    axios.get(`${nodeServerUrl}/node/api/vehicle/ghost?orgId=${orgId}&vendorId=${vendorId}`);
   const offVehicles = response.data;
   // console.log(`vehicleutils:fetchGhostVehicles: response: ${JSON.stringify(idleVehicles)}`)
   return offVehicles;
 }
 
-export async function fetchVehiclesIgnitionOff(orgId: string) {
+export async function fetchVehiclesIgnitionOff(orgId: string, vendorId: string) {
   
   // console.log(`vehicleutils:fetchVehiclesIgnitionOff: Entering with orgId ${orgId}`)
   const offResponse = await
-    axios.get(`${nodeServerUrl}/node/api/vehicle/ignition/off?orgId=${orgId}`);
+    axios.get(`${nodeServerUrl}/node/api/vehicle/ignition/off?orgId=${orgId}&vendorId=${vendorId}`);
   const offVehicles = offResponse.data;
 
   // console.log(`vehicleutils:fetchVehiclesIgnitionOff: response: ${JSON.stringify(idleVehicles)}`)
   return offVehicles;
 }
 
-export async function fetchAllIdleVehicles(orgId: string) {
+export async function fetchAllIdleVehicles(orgId: string, vendorId: string) {
   
   // console.log(`vehicleutils:fetchAllIdleVehicles: Entering with orgId ${orgId}`)
   const idleResponse = await
-    axios.get(`${nodeServerUrl}/node/api/vehicle/idle?orgId=${orgId}`);
+    axios.get(`${nodeServerUrl}/node/api/vehicle/idle?orgId=${orgId}&vendorId=${vendorId}`);
   const idleVehicles = idleResponse.data;
 
   // console.log(`vehicleutils:fetchAllIdleVehicles: response: ${JSON.stringify(idleVehicles)}`)
   return idleVehicles;
 }
 
-export async function fetchAllRunningVehicles(orgId: string, ) {
+export async function fetchAllRunningVehicles(orgId: string, vendorId: string) {
   
   // console.log(`vehicleutils:fetchAllRunningVehicles: Entering with orgId ${orgId}`)
   const idleResponse = await
-    axios.get(`${nodeServerUrl}/node/api/vehicle/running?orgId=${orgId}`);
+    axios.get(`${nodeServerUrl}/node/api/vehicle/running?orgId=${orgId}&vendorId=${vendorId}`);
   const idleVehicles = idleResponse.data;
 
   // console.log(`vehicleutils:fetchAllRunningVehicles: response: ${JSON.stringify(idleVehicles)}`)
   return idleVehicles;
 }
 
-export async function fetchAllSpeedingVehicles(orgId: string, ) {
+export async function fetchAllSpeedingVehicles(orgId: string, vendorId: string) {
   
   // console.log(`vehicleutils:fetchAllSpeedingVehicles: Entering with orgId ${orgId}`)
   const idleResponse = await
-    axios.get(`${nodeServerUrl}/node/api/vehicle/speeding?orgId=${orgId}`);
+    axios.get(`${nodeServerUrl}/node/api/vehicle/speeding?orgId=${orgId}&vendorId=${vendorId}`);
   const idleVehicles = idleResponse.data;
 
   // console.log(`vehicleutils:fetchAllSpeedingVehicles: response: ${JSON.stringify(idleVehicles)}`)

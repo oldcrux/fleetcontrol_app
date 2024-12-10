@@ -92,8 +92,9 @@ const Vehicles = () => {
     "None",
   ]);
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId as string;
+  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
   const userId = session?.user?.userId || "";
+  const role = session?.user?.role;
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGrafanaModalOpen, setIsGrafanaModalOpen] = useState(false);
@@ -395,7 +396,7 @@ const Vehicles = () => {
     onEditingRowSave: handleSaveVehicle,
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
-    enableEditing: true,
+    enableEditing: role !== 'view',
     getRowId: (row) => row.vehicleNumber,
 
     enableRowSelection:true,
@@ -493,7 +494,7 @@ const Vehicles = () => {
     renderTopToolbarCustomActions: ({ table }) => (
       <>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <Button disabled={Object.keys(rowSelection).length !== 0}
+      {role !=='view' && <Button disabled={Object.keys(rowSelection).length !== 0}
         onClick={() => {
           // console.log(`setting creating flag to true`);
           // setCreating(true);
@@ -507,9 +508,9 @@ const Vehicles = () => {
         }}
       >
         Create New Vehicle
-      </Button>
-      <Button disabled={Object.keys(rowSelection).length !== 0} onClick={() => setIsModalOpen(true)}>
-       Bulk Create Vehicles</Button>
+      </Button> }
+      {role !=='view' && <Button disabled={Object.keys(rowSelection).length !== 0} onClick={() => setIsModalOpen(true)}>
+       Bulk Create Vehicles</Button> }
 
        <Button disabled={Object.keys(rowSelection).length === 0} onClick={seeOnDashboard}>
        See on Dashboard
@@ -570,7 +571,7 @@ function useCreateVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId || "";
+  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
   const userId = session?.user?.userId || "";
 
   return useMutation({
@@ -608,11 +609,11 @@ function useUpdateVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {
-      const status = await updateVehicle(orgId as string, vehicle);
+      const status = await updateVehicle(orgId, vehicle);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -634,7 +635,7 @@ function useDeleteVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId as string;
+  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
   const userId = session?.user?.id as string;
 
   return useMutation({
