@@ -1,4 +1,4 @@
-import VehicleTable from "@/app/ui/vehicles/vehicle-table";
+import Vendors from "@/app/ui/vendor/vendor-table";
 
 export default async function Page({
   searchParams,
@@ -12,9 +12,9 @@ export default async function Page({
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between mb-2">
-        <h1 className="text-2xl text-white">Vehicles</h1>
+        <h1 className="text-2xl text-white">Vendors</h1>
       </div>
-        <VehicleTable />
+        <Vendors />
     </div>
   );
 }

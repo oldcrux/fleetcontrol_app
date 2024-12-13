@@ -70,7 +70,7 @@ export default function Chart() {
 
         eventSource.onmessage = (event: { data: string }) => {
           const runningVehicles = JSON.parse(event.data);
-          console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
+          // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
           let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
           setData([
             { label: "Ghost", value: totalGhostCount, color: ghost_vehicle_color },

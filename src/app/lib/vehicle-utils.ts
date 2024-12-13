@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+// import { getSession } from 'next-auth/react';
 import { Vehicle } from './types';
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
@@ -192,11 +192,11 @@ export async function getRunningVehicleCountSSE(orgId: string, vendorId: string)
 }
 
 
-export async function triggerAllReportGeneration() {
-  const session = await getSession();
+export async function triggerAllReportGeneration(orgId: string) {
+  // const session = await getSession();
 
-  const orgId = session?.user?.orgId;
-  // console.log(`vehicleutils:triggerAllReportGeneration: Entering with orgId ${orgId}`)
+  // const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
+  console.log(`vehicleutils:triggerAllReportGeneration: Entering with orgId ${orgId}`)
   await axios.get(`${nodeServerUrl}/node/api/job/report/job/create?orgId=${orgId}&queueName=reportGenerationQueue`);
 }
 

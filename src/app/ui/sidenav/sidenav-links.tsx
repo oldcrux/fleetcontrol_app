@@ -1,5 +1,6 @@
 'use client'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined';
+import EmojiTransportationIcon from '@mui/icons-material/EmojiTransportation';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import CommuteIcon from '@mui/icons-material/Commute';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -18,8 +19,8 @@ const links = [
   { name: 'Geofences', href: '/dashboard/geofences', icon: LocationOnIcon, roles:['system', 'admin'] },
   { name: 'Vehicles',href: '/dashboard/vehicles', icon: CommuteIcon, roles:['system', 'admin', 'view']},
   { name: 'Vehicle Telemetry Report', href: '/dashboard/reports', icon: AssessmentIcon, roles:['system', 'admin', 'view'] },
-  { name: 'Vendors', href: '/dashboard/vendors', icon: PeopleOutlineOutlinedIcon, roles:['system', 'admin'] },
-  // { name: 'Users', href: '/dashboard/users', icon: PeopleOutlineOutlinedIcon, roles:['system', 'admin'] },
+  { name: 'Vendors', href: '/dashboard/vendors', icon: EmojiTransportationIcon, roles:['system', 'admin'] },
+  { name: 'Users', href: '/dashboard/users', icon: PeopleOutlineOutlinedIcon, roles:['system', 'admin'] },
 ];
 
 interface SideNavLinksProps {

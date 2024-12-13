@@ -72,3 +72,40 @@ export interface Shape{
   id:string,
 }
 
+export interface Vendor {
+  orgId: string;
+  primaryOrgId: string;
+  organizationName: string;
+  primaryContactName: string;
+  primaryPhoneNumber: string;
+  primaryEmail: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  createdBy: string;
+}
+
+export interface User {
+  // Id?: string;
+  userId:string;
+  password:string;
+  role:string;
+  primaryOrgId: string;
+  secondaryOrgId: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  email: string;
+  emailVerified?: Date | null;
+  image?: string | null;
+  createdBy: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+}
