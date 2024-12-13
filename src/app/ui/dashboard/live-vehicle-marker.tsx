@@ -143,7 +143,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
   const { data: session, status } = useSession();
-  const orgId = session?.user?.orgId as string;
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId as string : session?.user?.primaryOrgId as string;
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 

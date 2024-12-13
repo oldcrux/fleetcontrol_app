@@ -31,7 +31,11 @@ export async function bulkCreateVehicle(vehicles: any) {
 export async function createVehicle(orgId: string, userId: string, vehicle: Vehicle) {
   // console.log(`create vehicle data ${JSON.stringify(data)}`);
   vehicle.orgId = orgId;
-  vehicle.createdBy = userId
+  vehicle.createdBy = userId;
+  if(vehicle.geofenceLocationGroupName && vehicle.geofenceLocationGroupName === 'None'){
+    vehicle.geofenceLocationGroupName = "";
+  }
+  
   const response = await axios.post(`${nodeServerUrl}/node/api/vehicle/create`, vehicle, {
     headers: {
       'Content-Type': 'application/json',
@@ -43,6 +47,11 @@ export async function createVehicle(orgId: string, userId: string, vehicle: Vehi
 export async function updateVehicle(orgId: string, vehicle: Vehicle) {
   // console.log(`updating vehicle data ${JSON.stringify(vehicle)}`);
   vehicle.orgId = orgId;
+
+  if(vehicle.geofenceLocationGroupName && vehicle.geofenceLocationGroupName === 'None'){
+    vehicle.geofenceLocationGroupName = "";
+  }
+
   const response = await axios.post(`${nodeServerUrl}/node/api/vehicle/update`, vehicle, {
     headers: {
       'Content-Type': 'application/json',
@@ -196,7 +205,7 @@ export async function triggerAllReportGeneration(orgId: string) {
   // const session = await getSession();
 
   // const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
-  console.log(`vehicleutils:triggerAllReportGeneration: Entering with orgId ${orgId}`)
+  // console.log(`vehicleutils:triggerAllReportGeneration: Entering with orgId ${orgId}`)
   await axios.get(`${nodeServerUrl}/node/api/job/report/job/create?orgId=${orgId}&queueName=reportGenerationQueue`);
 }
 

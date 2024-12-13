@@ -44,7 +44,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import axios from "axios";
 import { Button } from "../button";
-import { geofenceGroups } from "@/app/lib/geofence-utils";
 import { createVehicle, deleteVehicle, updateVehicle } from "@/app/lib/vehicle-utils";
 import { Vehicle } from "@/app/lib/types";
 import { useSession } from 'next-auth/react';
@@ -82,7 +81,7 @@ interface VehicleModal2Props {
 //   const [geofenceGroupNames, setGeofenceGroupNames] = useState([]);
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId || 'bmc';
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId as string : session?.user?.primaryOrgId as string;
 
   let option1 = [
     '-',
@@ -343,7 +342,7 @@ function useUpdateVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {

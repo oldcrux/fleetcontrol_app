@@ -24,7 +24,7 @@ export const Grafana: React.FC<JsonPopupProps> = ({
   
   const [url, setUrl] = useState('');
     const { data: session, status } = useSession();
-  const orgId = session?.user?.orgId;
+    const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
 
   useEffect(() => {
     const fetchUrl = async () => {
