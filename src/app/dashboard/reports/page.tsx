@@ -19,12 +19,13 @@ export default async function Page({
   const { data: session } = useSession();
   const role = session?.user?.role;
   const scrollRef = useRef(null);
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
 
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
+  // const query = searchParams?.query || "";
+  // const currentPage = Number(searchParams?.page) || 1;
 
   const generateReport = () => {
-    triggerAllReportGeneration();
+    triggerAllReportGeneration(orgId as string);
   };
 
   return (

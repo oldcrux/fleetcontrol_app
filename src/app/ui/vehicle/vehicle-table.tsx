@@ -48,7 +48,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { Button } from "../button";
-import { geofenceGroups } from "@/app/lib/geofence-utils";
+import { fetchGeofenceGroups } from "@/app/lib/geofence-utils";
 import {
   bulkCreateVehicle,
   createVehicle,
@@ -93,6 +93,7 @@ const Vehicles = () => {
   ]);
   const { data: session } = useSession();
   const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId as string: '' as string;
   const userId = session?.user?.userId || "";
   const role = session?.user?.role;
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
@@ -113,8 +114,8 @@ const Vehicles = () => {
   };
 
   useEffect(() => {
-    const fetchGeofenceGroups = async () => {
-      const allGeofenceGroups = await geofenceGroups(orgId);
+    const geofenceGroups = async () => {
+      const allGeofenceGroups = await fetchGeofenceGroups(orgId);
       // console.log(`useEffect called ${JSON.stringify(allGeofenceGroups)}`, allGeofenceGroups);
       const options = allGeofenceGroups.map(
         (location: { geofenceLocationGroupName: any }) =>
@@ -125,7 +126,7 @@ const Vehicles = () => {
       setGeofenceGroupNames(["None", ...options]);
       // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
     };
-    fetchGeofenceGroups();
+    geofenceGroups();
   }, []);
 
   const getInsights = (event: React.MouseEvent) => {
@@ -137,7 +138,6 @@ const Vehicles = () => {
       setIsGrafanaModalOpen(true);
     }
   };
-
   
   const seeOnDashboard = (event: React.MouseEvent) => {
     // console.info( rowSelection );
@@ -192,7 +192,7 @@ const Vehicles = () => {
         header: "Model",
       },
       {
-        accessorKey: "owner",
+        accessorKey: "vendorId",
         header: "Owner",
       },
       {
@@ -268,6 +268,7 @@ const Vehicles = () => {
         url.searchParams.set("globalFilter", globalFilter ?? "");
         url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
         url.searchParams.set("orgId", orgId);
+        url.searchParams.set("vendorId", vendorId);
 
         // console.log(`making db call: ${JSON.stringify(url)}`);
         const response = await axios.get(url.toString());
@@ -369,7 +370,7 @@ const Vehicles = () => {
 
   //DELETE action
   const openDeleteConfirmModal = async (row: MRT_Row<Vehicle>) => {
-    if (window.confirm("Are you sure you want to delete this vehicle?")) {
+    if (window.confirm(`Are you sure you want to delete vehicle ${row.original.vehicleNumber} ?`)) {
       await deleteVehicle(row.original.vehicleNumber);
     }
     refetch();

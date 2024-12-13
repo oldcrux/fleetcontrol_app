@@ -35,7 +35,7 @@ export default function DashboardMap({ query }: { query: string }) {
 
   const { data: session } = useSession();
   const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
-  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : null;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : '';
   const orgLatitude = Number(session?.user?.orgLatitude);
   const orgLongitude = Number(session?.user?.orgLongitude);
 

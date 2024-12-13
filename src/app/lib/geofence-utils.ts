@@ -66,7 +66,7 @@ export async function deleteGeofenceLocationById(orgId: string, id: string) {
   return response.data;
 }
 
-export async function geofenceGroups(orgId: string){
+export async function fetchGeofenceGroups(orgId: string){
   const response = await axios.get(`${nodeServerUrl}/node/api/geofence/group/distinct/search?orgId=${orgId}`);
   return response.data;
 }

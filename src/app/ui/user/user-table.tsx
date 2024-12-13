@@ -41,27 +41,28 @@ import {
   useMutation,
   useQuery,
 } from "@tanstack/react-query"; //Note: this is TanStack React Query V5
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import { Button } from "../button";
-import { Vendor } from "@/app/lib/types";
+import { User } from "@/app/lib/types";
 import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation'
-import { createVendor, deleteVendor, updateVendor } from "@/app/lib/org-utils";
+import { useRouter } from "next/navigation";
+import { createUser, deleteUser, updateUser } from "@/app/lib/user-utils";
+import { fetchVendorNames } from "@/app/lib/org-utils";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
 //Your API response shape will probably be different. Knowing a total row count is important though.
-type VendorApiResponse = {
-  data: Array<Vendor>;
+type UserApiResponse = {
+  data: Array<User>;
   meta: {
     totalRowCount: number;
   };
 };
 const fetchSize = 25;
 
-const Vendors = () => {
+const Users = () => {
   const router = useRouter();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef = useRef<MRT_RowVirtualizer>(null);
@@ -75,169 +76,245 @@ const Vendors = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
-  const [geofenceGroupNames, setGeofenceGroupNames] = useState<string[]>([
-    "None",
-  ]);
+  const [vendorNames, setVendorNames] = useState<string[]>(["None"]);
+  const [selectedVendor, setSelectedVendor] = useState<string>();
+
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.userId || "";
   const role = session?.user?.role;
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const columns = useMemo<MRT_ColumnDef<Vendor>[]>(
+  useEffect(() => {
+    const vendorNames = async () => {
+      const vendorNames = await fetchVendorNames(orgId);
+      const options = vendorNames.map((vendor: { organizationName: any }) => vendor.organizationName);
+      // console.log(`geofenceGrps:`, geofenceGrps);
+      setVendorNames([orgId, ...options]);
+      // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
+    };
+    vendorNames();
+  }, []);
+
+  const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
-        accessorKey: 'organizationName',
-        header: 'Vendor Name',
+        accessorKey: "userId",
+        header: "UserId",
         muiEditTextFieldProps: ({ row }) => ({
-            disabled: row.original.orgId ? true : false,
-            required: true,
-            error: !!validationErrors?.organizationName,
-            helperText: validationErrors?.organizationName,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                organizationName: undefined,
-              }),
-          }),
+          disabled: row.original.userId ? true : false,
+          required: true,
+          error: !!validationErrors?.userId,
+          helperText: validationErrors?.userId,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              userId: undefined,
+            }),
+        }),
       },
       {
-        accessorKey: 'orgId',
-        header: 'VendorId',
+        accessorKey: "firstName",
+        header: "First Name",
         muiEditTextFieldProps: ({ row }) => ({
-            disabled: row.original.orgId ? true : false,
-            required: true,
-            error: !!validationErrors?.orgId,
-            helperText: validationErrors?.orgId,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                orgId: undefined,
-              }),
-          }),
+          required: true,
+          error: !!validationErrors?.firstName,
+          helperText: validationErrors?.firstName,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              firstName: undefined,
+            }),
+        }),
       },
       {
-        accessorKey: 'primaryContactName',
-        header: 'Contact Name',
+        accessorKey: "lastName",
+        header: "Last Name",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.primaryContactName,
-            helperText: validationErrors?.primaryContactName,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                primaryContactName: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.lastName,
+          helperText: validationErrors?.lastName,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              lastName: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'primaryPhoneNumber',
-        header: 'Phone Number',
+        accessorKey: "phoneNumber",
+        header: "Phone Number",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.primaryPhoneNumber,
-            helperText: validationErrors?.primaryPhoneNumber,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                primaryPhoneNumber: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.phoneNumber,
+          helperText: validationErrors?.phoneNumber,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              phoneNumber: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'primaryEmail',
-        header: 'Email',
+        accessorKey: "email",
+        header: "Email",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.primaryEmail,
-            helperText: validationErrors?.primaryEmail,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                primaryEmail: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.email,
+          helperText: validationErrors?.email,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              email: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'address1',
-        header: 'Address1',
+        accessorKey: "primaryOrgId",
+        header: "Primary Org",
+        editVariant: "select",
+        editSelectOptions: vendorNames,
+        muiEditTextFieldProps: ({ row, table }) => ({
+          required: true,
+          onChange: (event) => {
+            const selectedVendor = event.target.value;
+            setSelectedVendor(selectedVendor);
+          },
+        }),
+      },
+      {
+        accessorKey: "role",
+        header: "Role",
+        editVariant: "select",
+        editSelectOptions: ["admin", "view"],
+        muiEditTextFieldProps: ({ row }) => ({
+          required: true,
+          value:
+            selectedVendor && selectedVendor !== orgId
+              ? "view"
+              : row.original.role, // Default to "view" or retain current value
+          disabled: selectedVendor && selectedVendor !== orgId ? true : false, // Disable if condition is met, otherwise allow edits
+          error: !!validationErrors?.role,
+          helperText: validationErrors?.role,
+          onChange: (event) => {
+            const value = event.target.value;
+            row.original.role = value; // Update role value dynamically
+          },
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              role: undefined,
+            }),
+        }),
+      },
+      {
+        accessorKey: "password",
+        header: "Password",
+        Cell: ({ row }) => "*****",
+        muiEditTextFieldProps: ({ row }) => ({
+          disabled: row.original.password? true: false,
+          required: true,
+          type: passwordVisible ? "text" : "password",
+          error: !!validationErrors?.password,
+          helperText: validationErrors?.password,
+          onFocus: () =>
+            setValidationErrors((prev) => ({ ...prev, password: undefined })),
+          InputProps: {
+            endAdornment: (
+              <IconButton
+                disabled={row.original.password? true: false}
+                onClick={() => setPasswordVisible((prev) => !prev)}
+                edge="end"
+              >
+                {passwordVisible ? <Visibility /> : <VisibilityOff />}
+              </IconButton>
+            ),
+          },
+        }),
+      },
+      {
+        accessorKey: "address1",
+        header: "Address1",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.address1,
-            helperText: validationErrors?.address1,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                address1: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.address1,
+          helperText: validationErrors?.address1,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              address1: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'address2',
-        header: 'Address2',
+        accessorKey: "address2",
+        header: "Address2",
       },
       {
-        accessorKey: 'city',
-        header: 'City',
+        accessorKey: "city",
+        header: "City",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.city,
-            helperText: validationErrors?.city,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                city: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.city,
+          helperText: validationErrors?.city,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              city: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'state',
-        header: 'State',
+        accessorKey: "state",
+        header: "State",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.state,
-            helperText: validationErrors?.state,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                state: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.state,
+          helperText: validationErrors?.state,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              state: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'country',
-        header: 'Country',
+        accessorKey: "country",
+        header: "Country",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.country,
-            helperText: validationErrors?.country,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                country: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.country,
+          helperText: validationErrors?.country,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              country: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'zip',
-        header: 'Zip',
+        accessorKey: "zip",
+        header: "Zip",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.zip,
-            helperText: validationErrors?.zip,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                zip: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.zip,
+          helperText: validationErrors?.zip,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              zip: undefined,
+            }),
+        },
       },
     ],
-    [geofenceGroupNames, validationErrors]
+    [passwordVisible, vendorNames, selectedVendor, validationErrors]
   );
 
   const { data, fetchNextPage, isError, isFetching, isLoading, refetch } =
-    useInfiniteQuery<VendorApiResponse>({
+    useInfiniteQuery<UserApiResponse>({
       queryKey: [
         "table-data",
         // TODO on globalFilter, this sends infinite requests to server. Need to investigate
@@ -248,7 +325,7 @@ const Vendors = () => {
       ],
       queryFn: async ({ pageParam }) => {
         // console.log(`page param`, pageParam);
-        const url = new URL("/node/api/vendor/search", nodeServerUrl);
+        const url = new URL("/node/api/user/fetch", nodeServerUrl);
         url.searchParams.set("start", `${(pageParam as number) * fetchSize}`);
         url.searchParams.set("size", `${fetchSize}`);
         url.searchParams.set("filters", JSON.stringify(columnFilters ?? []));
@@ -309,8 +386,8 @@ const Vendors = () => {
   }, [fetchMoreOnBottomReached]);
 
   //call CREATE hook
-  const { mutateAsync: createVendor, isPending: isCreatingVendor } =
-    useCreateVendor();
+  const { mutateAsync: createUser, isPending: isCreatingUser } =
+    useCreateUser();
   //call READ hook
   // const {
   //   data: fetchedVehicles = [],
@@ -319,44 +396,52 @@ const Vendors = () => {
   //   isLoading: isLoadingVehicles,
   // } = useGetVehicles();
   //call UPDATE hook
-  const { mutateAsync: updateVendor, isPending: isUpdatingVendor } =
-    useUpdateVendor();
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
+    useUpdateUser();
   //call DELETE hook
-  const { mutateAsync: deleteVendor, isPending: isDeletingVendor } =
-    useDeleteVendor();
+  const { mutateAsync: deleteUser, isPending: isDeletingUser } =
+    useDeleteUser();
 
   //CREATE action
-  const handleCreateVendor: MRT_TableOptions<Vendor>["onCreatingRowSave"] =
-    async ({ values, table }) => {
-      const newValidationErrors = validateVendor(values);
-      if (Object.values(newValidationErrors).some((error) => error)) {
-        setValidationErrors(newValidationErrors);
-        return;
-      }
-      setValidationErrors({});
-      await createVendor(values);
-      // console.log(`row created..`);
-      refetch();
-      table.setCreatingRow(null); //exit creating mode
-    };
+  const handleCreateUser: MRT_TableOptions<User>["onCreatingRowSave"] = async ({
+    values,
+    table,
+  }) => {
+    const newValidationErrors = validateUser(values);
+    if (Object.values(newValidationErrors).some((error) => error)) {
+      setValidationErrors(newValidationErrors);
+      return;
+    }
+    setValidationErrors({});
+    await createUser(values);
+    // console.log(`row created..`);
+    refetch();
+    table.setCreatingRow(null); //exit creating mode
+  };
 
   //UPDATE action
-  const handleSaveVendor: MRT_TableOptions<Vendor>["onEditingRowSave"] =
-    async ({ values, table }) => {
-      const newValidationErrors = validateVendor(values);
-      if (Object.values(newValidationErrors).some((error) => error)) {
-        setValidationErrors(newValidationErrors);
-        return;
-      }
-      setValidationErrors({});
-      await updateVendor(values);
-      table.setEditingRow(null); //exit editing mode
-    };
+  const handleSaveUser: MRT_TableOptions<User>["onEditingRowSave"] = async ({
+    values,
+    table,
+  }) => {
+    const newValidationErrors = validateUser(values);
+    if (Object.values(newValidationErrors).some((error) => error)) {
+      setValidationErrors(newValidationErrors);
+      return;
+    }
+    setValidationErrors({});
+    await updateUser(values);
+    table.setEditingRow(null); //exit editing mode
+  };
 
   //DELETE action
-  const openDeleteConfirmModal = async (row: MRT_Row<Vendor>) => {
-    if (window.confirm(`Are you sure you want to delete Vendor ${row.original.orgId} ?`)) {
-      await deleteVendor(row.original.orgId);
+  const openDeleteConfirmModal = async (row: MRT_Row<User>) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete User ${row.original.userId} ?`
+      )
+    ) {
+      await deleteUser(row.original.userId);
     }
     refetch();
   };
@@ -377,17 +462,14 @@ const Vendors = () => {
     enableDensityToggle: false,
 
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateVendor,
+    onCreatingRowSave: handleCreateUser,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveVendor,
+    onEditingRowSave: handleSaveUser,
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
-    enableEditing: role !== 'view',
-    getRowId: (row) => row.orgId,
+    enableEditing: role !== "view",
+    getRowId: (row) => row.userId,
 
-    enableRowSelection:true,
-
-    
     // muiTableBodyRowProps: ({ row }) => ({
     //   onClick: () =>
     //     setRowSelection((prev) => {
@@ -413,7 +495,7 @@ const Vendors = () => {
 
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h5">Create New Vendor</DialogTitle>
+        <DialogTitle variant="h5">Create New User</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
@@ -426,7 +508,7 @@ const Vendors = () => {
     ),
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h5">Edit Vendor</DialogTitle>
+        <DialogTitle variant="h5">Edit User</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -449,7 +531,7 @@ const Vendors = () => {
       //   />,
       <MRT_ActionMenuItem
         icon={<DeleteIcon color="error" />}
-        key={`delete-${row.original.orgId}`}
+        key={`delete-${row.original.userId}`}
         label="Delete"
         onClick={() => {
           openDeleteConfirmModal(row);
@@ -479,23 +561,26 @@ const Vendors = () => {
 
     renderTopToolbarCustomActions: ({ table }) => (
       <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      {role !=='view' && <Button disabled={Object.keys(rowSelection).length !== 0}
-        onClick={() => {
-          // console.log(`setting creating flag to true`);
-          // setCreating(true);
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
-        }}
-      >
-        Create New Vendor
-      </Button> }
-       </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {role !== "view" && (
+            <Button
+              disabled={Object.keys(rowSelection).length !== 0}
+              onClick={() => {
+                // console.log(`setting creating flag to true`);
+                // setCreating(true);
+                table.setCreatingRow(true); //simplest way to open the create row modal with no default values
+                //or you can pass in a row object to set default values with the `createRow` helper function
+                // table.setCreatingRow(
+                //   createRow(table, {
+                //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
+                //   }),
+                // );
+              }}
+            >
+              Create New User
+            </Button>
+          )}
+        </div>
       </>
     ),
     // initialState: {
@@ -528,8 +613,8 @@ const Vendors = () => {
       showAlertBanner: isError,
       showProgressBars: isFetching,
       sorting,
-      isSaving: isCreatingVendor || isUpdatingVendor || isDeletingVendor,
-      rowSelection
+      isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
+      rowSelection,
     },
     rowVirtualizerInstanceRef, //get access to the virtualizer instance
     rowVirtualizerOptions: { overscan: 4 },
@@ -539,20 +624,22 @@ const Vendors = () => {
 };
 
 //CREATE hook (post new vehicle to api)
-function useCreateVendor() {
+function useCreateUser() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.userId || "";
 
   return useMutation({
-    mutationFn: async (vendor: Vendor) => {
-      const status = await createVendor(orgId, userId, vendor);
+    mutationFn: async (user: User) => {
+      const status = await createUser(orgId, userId, user);
       return Promise.resolve(status);
     },
     //client side optimistic update
-    onMutate: (newVendorInfo: Vendor) => {},
+    onMutate: (newUserInfo: User) => {},
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['vehicles'] }), //refetch vehicles after mutation, disabled for demo
   });
 }
@@ -577,19 +664,21 @@ function useCreateVendor() {
 // }
 
 //UPDATE hook (put vehicle in api)
-function useUpdateVendor() {
+function useUpdateUser() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
 
   return useMutation({
-    mutationFn: async (vendor: Vendor) => {
-      const status = await updateVendor(orgId, vendor);
+    mutationFn: async (user: User) => {
+      const status = await updateUser(orgId, user);
       return Promise.resolve(status);
     },
     //client side optimistic update
-    onMutate: (newVendorInfo: Vendor) => {
+    onMutate: (newUserInfo: User) => {
       // queryClient.setQueryData(["vehicles"], (prevVehicles: any) =>
       //   prevVehicles?.map((prevVehicle: Vehicle) =>
       //     prevVehicle.vehicleNumber === newVehicleInfo.vehicleNumber
@@ -603,21 +692,21 @@ function useUpdateVendor() {
 }
 
 //DELETE hook (delete vehicle in api)
-function useDeleteVendor() {
+function useDeleteUser() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
-  const userId = session?.user?.id as string;
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : (session?.user?.primaryOrgId as string);
+  const loggedInUserId = session?.user?.id as string;
 
   return useMutation({
-    mutationFn: async (vendorId: string) => {
+    mutationFn: async (userId: string) => {
       //send api update request here
-      const status = await deleteVendor(userId, orgId, vendorId);
+      const status = await deleteUser(userId, orgId, loggedInUserId);
       return Promise.resolve(status);
     },
     //client side optimistic update
-    onMutate: (vendorId: string) => {
+    onMutate: (userId: string) => {
       // queryClient.setQueryData(["vehicles"], (prevVehicles: any) =>
       //   prevVehicles?.filter(
       //     (vehicle: Vehicle) => vehicle.vehicleNumber !== vehicleNumber
@@ -626,19 +715,18 @@ function useDeleteVendor() {
     },
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['vehicles'] }), //refetch vehicles after mutation, disabled for demo
   });
-  
 }
 
 const queryClient = new QueryClient();
 
-const VendorsWithReactQueryProvider = () => (
+const UsersWithReactQueryProvider = () => (
   //App.tsx or AppProviders file. Don't just wrap this component with QueryClientProvider! Wrap your whole App!
   <QueryClientProvider client={queryClient}>
-    <Vendors />
+    <Users />
   </QueryClientProvider>
 );
 
-export default VendorsWithReactQueryProvider;
+export default UsersWithReactQueryProvider;
 
 const validateRequired = (value: string) => !!value.length;
 const validateRequiredNumber = (value: any) => {
@@ -650,37 +738,24 @@ const validateSerialNumber = (value: any) => {
   return !isNaN(numValue) && numValue.toString().length > 0;
 };
 
-function validateVendor(vendor: Vendor) {
+function validateUser(user: User) {
   return {
-    orgId: !validateRequired(vendor.orgId)
-      ? "VendorId is Required"
+    userId: !validateRequired(user.userId) ? "UserId is Required" : "",
+    primaryOrgId: !validateRequired(user.primaryOrgId)
+      ? "Primary organization is Required"
       : "",
-    organizationName: !validateRequired(vendor.organizationName)
-      ? "Organization Name is Required"
+    firstName: !validateRequired(user.firstName)
+      ? "First Name is Required"
       : "",
-      primaryContactName: !validateRequired(vendor.primaryContactName)
-      ? "Contact Name is Required"
-      : "",
-      primaryPhoneNumber: !validateRequired(vendor.primaryPhoneNumber)
+    lastName: !validateRequired(user.lastName) ? "Last Name is Required" : "",
+    phoneNumber: !validateRequired(user.phoneNumber)
       ? "Phone Number is Required"
       : "",
-      primaryEmail: !validateRequired(vendor.primaryEmail)
-      ? "Email is Required"
-      : "",
-      address1: !validateRequired(vendor.address1)
-      ? "Address1 is Required"
-      : "",
-      city: !validateRequired(vendor.city)
-      ? "City is Required"
-      : "",
-      state: !validateRequired(vendor.state)
-      ? "State is Required"
-      : "",
-      country: !validateRequired(vendor.country)
-      ? "Country is Required"
-      : "",
-      zip: !validateRequired(vendor.zip)
-      ? "Zip is Required"
-      : "",
+    email: !validateRequired(user.email) ? "Email is Required" : "",
+    address1: !validateRequired(user.address1) ? "Address1 is Required" : "",
+    city: !validateRequired(user.city) ? "City is Required" : "",
+    state: !validateRequired(user.state) ? "State is Required" : "",
+    country: !validateRequired(user.country) ? "Country is Required" : "",
+    zip: !validateRequired(user.zip) ? "Zip is Required" : "",
   };
 }
