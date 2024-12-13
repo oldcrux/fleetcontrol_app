@@ -63,8 +63,16 @@ const columns: MRT_ColumnDef<VehicleTelemetryReport>[] = [
     accessorKey: 'vehicleNumber',
   },
   {
-    header: 'Owner',
-    accessorKey: 'owner',
+    header: 'Vehicle Status',
+    accessorKey: 'vehicleStatus',
+  },
+  {
+    header: 'Vehicle Group',
+    accessorKey: 'vehicleGroup',
+  },
+  {
+    header: 'Vendor',
+    accessorKey: 'vendor',
   },
   {
     header: 'Geofence Group',
@@ -185,7 +193,8 @@ const GeofenceReport = () => {
   const [sorting, setSorting] = useState<MRT_SortingState>([]);
 
   const { data: session } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : '';
 
   const { data, fetchNextPage, isError, isFetching, isLoading } =
     useInfiniteQuery<VehicleTelemetryReportApiResponse>({

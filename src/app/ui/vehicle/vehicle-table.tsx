@@ -62,6 +62,7 @@ import { Grafana } from "../dashboard/grafana";
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 // import { redirect } from "next/navigation";
 import { useRouter } from 'next/navigation'
+import { fetchVendorNames } from "@/app/lib/org-utils";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -100,6 +101,7 @@ const Vehicles = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGrafanaModalOpen, setIsGrafanaModalOpen] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
+  const [vendorNames, setVendorNames] = useState<string[]>(["None"]);
 
   const handleBulkCreateVehicle = (data: any) => {
     // console.log('Saved Data:', data);
@@ -112,6 +114,17 @@ const Vehicles = () => {
     }));
     bulkCreateVehicle(updatedData);
   };
+
+  useEffect(() => {
+    const vendorNames = async () => {
+      const vendorNames = await fetchVendorNames(orgId);
+      const options = vendorNames.map((vendor: { organizationName: any }) => vendor.organizationName);
+      // console.log(`geofenceGrps:`, geofenceGrps);
+      setVendorNames([orgId, ...options]);
+      // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
+    };
+    vendorNames();
+  }, []);
 
   useEffect(() => {
     const geofenceGroups = async () => {
@@ -168,20 +181,21 @@ const Vehicles = () => {
         }),
       },
       {
-        accessorKey: "isActive",
-        header: "Is Active?",
-        Cell: ({ row }) =>
-          row._valuesCache.isActive === "1" ? (
-            <CheckIcon sx={{ color: "#22c55e" }} />
-          ) : (
-            <CloseIcon sx={{ color: "#ef4444" }} />
-          ),
+        accessorKey: "status",
+        header: "Status",
+        // Cell: ({ row }) =>
+        //   row._valuesCache.isActive === "1" ? (
+        //     <CheckIcon sx={{ color: "#22c55e" }} />
+        //   ) : (
+        //     <CloseIcon sx={{ color: "#ef4444" }} />
+        //   ),
         muiEditTextFieldProps: {
-          defaultValue: "true",
+          required: true,
+          // value: "Active",
           helperText: validationErrors?.isActive,
         },
         editVariant: "select",
-        editSelectOptions: ["1", "0"],
+        editSelectOptions: ["Active", "NotActive", "Standby"],
       },
       {
         accessorKey: "make",
@@ -193,7 +207,12 @@ const Vehicles = () => {
       },
       {
         accessorKey: "vendorId",
-        header: "Owner",
+        header: "Vendor",
+        editVariant: "select",
+        editSelectOptions: vendorNames,
+        muiEditTextFieldProps: ({ row, table }) => ({
+          required: true,
+        }),
       },
       {
         accessorKey: "primaryPhoneNumber",
@@ -246,7 +265,7 @@ const Vehicles = () => {
         },
       },
     ],
-    [geofenceGroupNames, validationErrors]
+    [vendorNames, geofenceGroupNames, validationErrors]
   );
 
   const { data, fetchNextPage, isError, isFetching, isLoading, refetch } =

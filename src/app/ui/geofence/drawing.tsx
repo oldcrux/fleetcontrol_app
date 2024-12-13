@@ -24,7 +24,7 @@ const Drawing = () => {
   const [geofenceLocationGroup, setGeofenceLocationGroup] = useState("");
 
   const { data: session, status } = useSession();
-  const orgId = session?.user?.orgId;
+  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
   const userId = session?.user?.id;
 
   const [isBulkCreateModalOpen, setIsBulkCreateModalOpen] = useState(false);
