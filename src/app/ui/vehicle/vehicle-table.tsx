@@ -195,7 +195,7 @@ const Vehicles = () => {
           helperText: validationErrors?.isActive,
         },
         editVariant: "select",
-        editSelectOptions: ["Active", "NotActive", "Standby"],
+        editSelectOptions: ["Active", "InActive", "Standby"],
       },
       {
         accessorKey: "make",
