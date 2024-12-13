@@ -182,7 +182,7 @@ const columns: MRT_ColumnDef<VehicleTelemetryReport>[] = [
 
 const fetchSize = 5;
 
-const GeofenceReport = () => {
+const VehicleReport = () => {
   const tableContainerRef = useRef<HTMLDivElement>(null); //we can get access to the underlying TableContainer element and react to its scroll events
   const rowVirtualizerInstanceRef = useRef<MRT_RowVirtualizer>(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
 
@@ -352,14 +352,14 @@ const GeofenceReport = () => {
 
 const queryClient = new QueryClient();
 
-const GeofenceReportWithReactQueryProvider = () => (
+const VehicleReportWithReactQueryProvider = () => (
   //App.tsx or AppProviders file. Don't just wrap this component with QueryClientProvider! Wrap your whole App!
   <QueryClientProvider client={queryClient}>
-    <GeofenceReport />
+    <VehicleReport />
   </QueryClientProvider>
 );
 
-export default GeofenceReportWithReactQueryProvider;
+export default VehicleReportWithReactQueryProvider;
 
 
 const roundToDecimal = (value: number, decimals: number) => {
