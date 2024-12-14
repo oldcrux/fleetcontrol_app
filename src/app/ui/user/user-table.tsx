@@ -215,7 +215,7 @@ const Users = () => {
         header: "Password",
         Cell: ({ row }) => "*****",
         muiEditTextFieldProps: ({ row }) => ({
-          disabled: row.original.password? true: false,
+        //   disabled: row.original.password? true: false,
           required: true,
           type: passwordVisible ? "text" : "password",
           error: !!validationErrors?.password,
@@ -225,7 +225,7 @@ const Users = () => {
           InputProps: {
             endAdornment: (
               <IconButton
-                disabled={row.original.password? true: false}
+                // disabled={row.original.password? true: false}
                 onClick={() => setPasswordVisible((prev) => !prev)}
                 edge="end"
               >
