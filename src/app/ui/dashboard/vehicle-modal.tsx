@@ -14,7 +14,7 @@ const VehicleModal = (label: any) => {
   
   const { data: session } = useSession();
   const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
-  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : null;
+  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : '';
 
   // console.log(`calling modal table with label: ${JSON.stringify(label.label)}`);
   const columns = useMemo<MRT_ColumnDef<Vehicle>[]>(
@@ -78,7 +78,7 @@ const VehicleModal = (label: any) => {
 
   useEffect(() => {
     const vehicles = async () => {
-      console.log(`orgId fetched from session: ${orgId}`);
+      // console.log(`orgId fetched from session: ${orgId}`);
       if (typeof window !== "undefined") {
         if (label.label === "Ghost") {
           const offVehicles = await fetchGhostVehicles(orgId as string, vendorId as string);
