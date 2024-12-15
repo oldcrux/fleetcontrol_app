@@ -35,7 +35,7 @@ export default function SideNav() {
       } h-full flex-col px-3 py-4 transition-all duration-300 relative`}
     >
       <Link
-        className={`mb-2 flex h-30 items-end justify-start rounded-md bg-blue-200 p-4 ${
+        className={`mb-2 flex h-30 items-end justify-start rounded-md bg-white p-4 ${
           isCollapsed ? "justify-center" : ""
         }`}
         href="/"
