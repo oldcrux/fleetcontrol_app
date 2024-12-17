@@ -25,8 +25,8 @@ const VehicleModal = (label: any) => {
         header: "Vehicle Number",
       },
       {
-        accessorKey: "owner",
-        header: "Owner",
+        accessorKey: "vendorId",
+        header: "Vendor",
       },
       {
         accessorKey: "primaryPhoneNumber",

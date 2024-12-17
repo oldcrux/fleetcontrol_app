@@ -11,12 +11,16 @@ import {
   searchGeofence,
 } from "@/app/lib/geofence-utils";
 import { useSession } from "next-auth/react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { Shape } from "@/app/lib/types";
 import { BulkCreateGeofences } from "./bulk-create-geofences";
 import { GeofencesModal } from "./geofences-modal";
 
 const Drawing = () => {
+  const { replace } = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const drawingManager = geofenceDrawingManager();
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [activeShapeIndex, setActiveShapeIndex] = useState<any>();
@@ -24,7 +28,9 @@ const Drawing = () => {
   const [geofenceLocationGroup, setGeofenceLocationGroup] = useState("");
 
   const { data: session, status } = useSession();
-  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : session?.user?.primaryOrgId;
   const userId = session?.user?.id;
 
   const [isBulkCreateModalOpen, setIsBulkCreateModalOpen] = useState(false);
@@ -49,6 +55,12 @@ const Drawing = () => {
       setActiveShapeIndex(index); // Focus on the clicked shape
     });
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    const searchParam = params.get("query");
+    setGeofenceLocationGroup(searchParam as string);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!drawingManager) return;
@@ -97,7 +109,6 @@ const Drawing = () => {
     const map = drawingManager?.getMap();
     const fetchGeofences = async () => {
       if (geofenceLocationGroup) {
-
         cleanupShapes();
 
         const query = `geofenceLocationGroupName=${geofenceLocationGroup}`;
@@ -165,7 +176,7 @@ const Drawing = () => {
       }
     });
     setShapes([]);
-  }
+  };
 
   const saveShapes = () => {
     const shapeData = shapes.map((shape) => {
@@ -206,7 +217,6 @@ const Drawing = () => {
 
   const debouncedSetGroup = useDebouncedCallback((value) => {
     // Perform side effects here, e.g., API calls or state updates
-    // console.log('Debounced value:', value);
   }, 300);
 
   const handleGeofenceGroupValueChange = (
@@ -215,7 +225,7 @@ const Drawing = () => {
     const value = e.target.value;
     setGeofenceLocationGroup(value); // Immediate update for input typing
     debouncedSetGroup(value); // Debounced side-effect
-    if(!value){
+    if (!value) {
       cleanupShapes();
     }
   };
@@ -251,6 +261,7 @@ const Drawing = () => {
           onChange={handleGeofenceGroupValueChange}
           className="border border-gray-300 rounded-md p-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500 input-text"
           placeholder="Enter Geofence Group"
+          defaultValue={searchParams.get("query")?.toString()}
         />
 
         <div className="relative shadow-md z-10 flex space-x-4">

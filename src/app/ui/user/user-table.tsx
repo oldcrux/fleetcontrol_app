@@ -733,10 +733,7 @@ const validateRequiredNumber = (value: any) => {
   const numValue = Number(value);
   return !isNaN(numValue) && numValue.toString().length === 10;
 };
-const validateSerialNumber = (value: any) => {
-  const numValue = Number(value);
-  return !isNaN(numValue) && numValue.toString().length > 0;
-};
+
 
 function validateUser(user: User) {
   return {
