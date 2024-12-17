@@ -145,7 +145,7 @@ const Vehicles = () => {
   const getInsights = (event: React.MouseEvent) => {
     // console.info( rowSelection );
     const selectedVehicles = Object.keys(rowSelection).filter((key) => rowSelection[key]);
-    console.info( selectedVehicles );
+    // console.info( selectedVehicles );
     setSelectedVehicles(selectedVehicles);
     if(selectedVehicles){
       setIsGrafanaModalOpen(true);
@@ -155,7 +155,7 @@ const Vehicles = () => {
   const seeOnDashboard = (event: React.MouseEvent) => {
     // console.info( rowSelection );
     const selectedVehicles = Object.keys(rowSelection).filter((key) => rowSelection[key]);
-    console.info( selectedVehicles );
+    // console.info( selectedVehicles );
     // setSelectedVehicles(selectedVehicles);
     if(selectedVehicles){
       const vehicles = selectedVehicles.join(',');
@@ -212,6 +212,14 @@ const Vehicles = () => {
         editSelectOptions: vendorNames,
         muiEditTextFieldProps: ({ row, table }) => ({
           required: true,
+          error: !!validationErrors?.vendorId,
+          helperText: validationErrors?.vendorId,
+          //remove any previous validation errors when vehicle focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              vendorId: undefined,
+            }),
         }),
       },
       {

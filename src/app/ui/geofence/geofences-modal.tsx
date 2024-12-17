@@ -1,6 +1,7 @@
 import { Box, IconButton, Modal } from "@mui/material";
 import Geofences from "./geofences";
 import CloseIcon from "@mui/icons-material/Close";
+// import Modal from "react-modal";
 
 type JsonPopupProps = {
   show: boolean;
@@ -18,12 +19,13 @@ export const GeofencesModal: React.FC<JsonPopupProps> = ({ show, onClose }) => {
       <Box
         sx={{
           position: "relative",
-          margin: "1%",
-          top: "2%",
+          margin: "2%",
           bgcolor: "background.paper",
           borderRadius: 1,
           boxShadow: 24,
           p: 4,
+          maxHeight: "95vh",
+          overflow: "auto",
         }}
       >
         <IconButton
@@ -36,7 +38,7 @@ export const GeofencesModal: React.FC<JsonPopupProps> = ({ show, onClose }) => {
         >
           <CloseIcon />
         </IconButton>
-        <Geofences />
+        <Geofences onClose={onClose}/>
       </Box>
     </Modal>
   );
