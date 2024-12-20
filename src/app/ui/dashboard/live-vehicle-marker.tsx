@@ -151,6 +151,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
     const fetchVehicle = async () => {
       try {
         const fetchedVehicle = await searchVehicleByNumber(
+          session?.token.idToken, 
           orgId,
           vehicleNumber
         );

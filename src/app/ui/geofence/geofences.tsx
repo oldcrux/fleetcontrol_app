@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import { Button } from "../button";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -98,8 +99,14 @@ const Geofences: React.FC<LocationProps> = ({ onClose }) => {
       url.searchParams.set("orgId", orgId as string);
 
       try {
-        const response = await fetch(url.href);
-        const json = (await response.json()) as GeofenceApiResponse;
+        // const response = await fetch(url.href);
+        const response = await axios.get(`${url}`, {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // withCredentials: true,
+        });
+        const json = (await response.data) as GeofenceApiResponse;
         setData(json.data);
         setRowCount(json.meta.totalRowCount);
       } catch (error) {
@@ -291,7 +298,7 @@ const Geofences: React.FC<LocationProps> = ({ onClose }) => {
         return;
       }
       setValidationErrors({});
-      await updateGeofence(geofenceData);
+      await updateGeofence(session?.token.idToken, geofenceData);
       table.setEditingRow(null);
     };
 
@@ -302,7 +309,7 @@ const Geofences: React.FC<LocationProps> = ({ onClose }) => {
         `Are you sure you want to delete geofence ${row.original.tag} ?`
       )
     ) {
-      await deleteGeofenceLocationById(orgId as string, row.id);
+      await deleteGeofenceLocationById(session?.token.idToken, orgId as string, row.id);
     }
     setIsRefetching(true);
   };

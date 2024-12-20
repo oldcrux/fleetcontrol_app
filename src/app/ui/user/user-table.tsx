@@ -90,7 +90,7 @@ const Users = () => {
 
   useEffect(() => {
     const vendorNames = async () => {
-      const vendorNames = await fetchVendorNames(orgId);
+      const vendorNames = await fetchVendorNames(session?.token.idToken, orgId);
       const options = vendorNames.map((vendor: { organizationName: any }) => vendor.organizationName);
       // console.log(`geofenceGrps:`, geofenceGrps);
       setVendorNames([orgId, ...options]);
@@ -115,6 +115,15 @@ const Users = () => {
               userId: undefined,
             }),
         }),
+      },
+      {
+        accessorKey: "isActive",
+        header: "Active?",
+        editVariant: 'select',
+        editSelectOptions: ["true", "false"],
+        accessorFn: (originalRow) => (originalRow.isActive ? 'true' : 'false'),
+        Cell: ({ cell }) =>
+          cell.getValue() === 'true' ? 'true' : 'false',
       },
       {
         accessorKey: "firstName",
@@ -216,7 +225,7 @@ const Users = () => {
         Cell: ({ row }) => "*****",
         muiEditTextFieldProps: ({ row }) => ({
         //   disabled: row.original.password? true: false,
-          required: true,
+          // required: true,
           type: passwordVisible ? "text" : "password",
           error: !!validationErrors?.password,
           helperText: validationErrors?.password,
@@ -334,7 +343,13 @@ const Users = () => {
         url.searchParams.set("orgId", orgId);
 
         // console.log(`making db call: ${JSON.stringify(url)}`);
-        const response = await axios.get(url.toString());
+        const response = await axios.get(url.toString(), 
+        {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // withCredentials: true,
+        });
         // console.log(`data received ${JSON.stringify(response.data)}`);
 
         return response.data;
@@ -635,7 +650,7 @@ function useCreateUser() {
 
   return useMutation({
     mutationFn: async (user: User) => {
-      const status = await createUser(orgId, userId, user);
+      const status = await createUser(session?.token.idToken, orgId, userId, user);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -674,7 +689,7 @@ function useUpdateUser() {
 
   return useMutation({
     mutationFn: async (user: User) => {
-      const status = await updateUser(orgId, user);
+      const status = await updateUser(session?.token.idToken, orgId, user);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -702,7 +717,7 @@ function useDeleteUser() {
   return useMutation({
     mutationFn: async (userId: string) => {
       //send api update request here
-      const status = await deleteUser(userId, orgId, loggedInUserId);
+      const status = await deleteUser(session?.token.idToken, userId, orgId, loggedInUserId);
       return Promise.resolve(status);
     },
     //client side optimistic update

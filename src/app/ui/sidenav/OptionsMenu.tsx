@@ -45,7 +45,7 @@ export default function OptionsMenu() {
         <Avatar
           sizes="small"
           alt={user?.userId}
-          src="/static/images/avatar/7.jpg"
+          src={user?.image? user?.image : ''}
           sx={{ width: 36, height: 36 }}
         />
       </MenuButton>

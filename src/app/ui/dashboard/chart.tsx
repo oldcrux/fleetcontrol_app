@@ -1,4 +1,5 @@
 "use client";
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { Pie, Bar } from "react-chartjs-2";
 import { useState, useEffect } from "react";
 import Modal from "react-modal";
@@ -32,6 +33,8 @@ ChartJS.register(
 );
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
+const controller = new AbortController();
+const signal = controller.signal;
 
 interface ChartData {
   label: string;
@@ -49,7 +52,7 @@ export default function Chart() {
   const [data, setData] = useState<ChartData[]>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<ChartData>();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
   const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : '';
 
@@ -57,41 +60,65 @@ export default function Chart() {
     let eventSource: any;
     const fetchVehicleCounts = async () => {
       try {
-        // console.log(`session status: ${status}`);
+        // console.log(`session Use: `, session?.user);
+        // console.log(`session status: `, session?.token.accessToken);
         // console.log(`orgId fetched from session: ${orgId}`);
-        const allVehicleCount = await getVehicleCounts(orgId as string, vendorId as string);
+        const allVehicleCount = await getVehicleCounts(session?.token.idToken, orgId as string, vendorId as string);
         // console.log(`all vehicle count fetched - ${allVehicleCount}`);
         // console.log("checking type of - " + typeof allVehicleCount);
         // setallVehicleCountData(allVehicleCount);
 
         // console.log(`reading session variables: ${orgId}`);
-        eventSource = new EventSource(
-          `${nodeServerUrl}/node/api/vehicleTelemetryData/fetchRunningCountSSE?orgId=${orgId}&vendorId=${vendorId}`); // Connect to SSE endpoint
+        eventSource = fetchEventSource(
+          `${nodeServerUrl}/node/api/vehicleTelemetryData/fetchRunningCountSSE?orgId=${orgId}&vendorId=${vendorId}`, 
+          {
+            headers: {
+              Authorization: `Bearer ${session?.token.idToken}`,
+            },
+            signal,
+            // withCredentials: true,
+            onmessage: (event: { data: string }) => {
+              const runningVehicles = JSON.parse(event.data);
+              // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
+              let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
+              setData([
+                { label: "Ghost", value: totalGhostCount, color: ghost_vehicle_color },
+                { label: "Off", value: runningVehicles.ignitionOffVehiclesCount, color: off_vehicle_color},
+                { label: "Idle", value: runningVehicles.idleVehiclesCount, color: idle_vehicle_color },
+                { label: "Running", value: runningVehicles.runningVehiclesCount, color: running_vehicle_color },
+                { label: "Speeding", value: runningVehicles.speedingVehiclesCount, color: speeding_vehicle_color },
+              ]);
+            },
+            onclose(){
+              console.error('SSE error:'); //TODO close connection
+            },
+            onerror: (error) => {
+              console.error('SSE error:', error);
+            },
+          }); // Connect to SSE endpoint
 
-        eventSource.onmessage = (event: { data: string }) => {
-          const runningVehicles = JSON.parse(event.data);
-          // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
-          let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
-          setData([
-            { label: "Ghost", value: totalGhostCount, color: ghost_vehicle_color },
-            { label: "Off", value: runningVehicles.ignitionOffVehiclesCount, color: off_vehicle_color},
-            { label: "Idle", value: runningVehicles.idleVehiclesCount, color: idle_vehicle_color },
-            { label: "Running", value: runningVehicles.runningVehiclesCount, color: running_vehicle_color },
-            { label: "Speeding", value: runningVehicles.speedingVehiclesCount, color: speeding_vehicle_color },
-          ]);
-        };
+        // eventSource.onmessage = (event: { data: string }) => {
+        //   const runningVehicles = JSON.parse(event.data);
+        //   // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${event.data}`);
+        //   let totalGhostCount = allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
+        //   setData([
+        //     { label: "Ghost", value: totalGhostCount, color: ghost_vehicle_color },
+        //     { label: "Off", value: runningVehicles.ignitionOffVehiclesCount, color: off_vehicle_color},
+        //     { label: "Idle", value: runningVehicles.idleVehiclesCount, color: idle_vehicle_color },
+        //     { label: "Running", value: runningVehicles.runningVehiclesCount, color: running_vehicle_color },
+        //     { label: "Speeding", value: runningVehicles.speedingVehiclesCount, color: speeding_vehicle_color },
+        //   ]);
+        // };
       } catch (error) {
         console.error("Error fetching vehicle counts:", error);
       }
     };
     fetchVehicleCounts();
 
-    //TODO this eventSource is not getting closed.  Even though it gets closed in the map.
+    //TODO this is not working. The connection is not getting closed when navigating away from dashboard
     return () => {
-      if (eventSource) {
-        eventSource.close();
-        console.log("chart SSE connection closed");
-      }
+      controller.abort();
+      console.log("chart SSE connection closed");
     };
   }, []);
 

@@ -1,4 +1,5 @@
 "use client";
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { Map } from "@vis.gl/react-google-maps";
@@ -10,6 +11,8 @@ import { useSession } from "next-auth/react";
 // import { Shape } from "@/app/lib/Types";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
+const controller = new AbortController();
+const signal = controller.signal;
 
 interface Shape {
   type: string;
@@ -84,6 +87,7 @@ export default function DashboardMap({ query }: { query: string }) {
         setSearchParam(searchParam);
 
         const geofences = await searchGeofence(
+          session?.token.idToken, 
           orgId as string,
           encodedViewport,
           searchParam as string
@@ -130,38 +134,61 @@ export default function DashboardMap({ query }: { query: string }) {
           path = `${path}&query=${searchParam}`;
         }
         // console.log(`request path`, path);
-        eventSource = new EventSource(`${nodeServerUrl}${path}`); // Connect to SSE endpoint
-
-        eventSource.onmessage = (event: any) => {
-          const eventData = JSON.parse(event.data);
-          // console.log(`all vehicles fetched=>`, event.data);
-          if (eventData.length > 0) {
-            const vehicle = eventData.map((event: any) => ({
-              ignition: event.ignition,
-              key: event.vehicleNumber,
-              speed: event.speed,
-              location: {
-                lat: event.latitude,
-                lng: event.longitude,
-              },
-            }));
-            // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
-            setVehicles(vehicle);
-          } else {
-            setVehicles([]);
-          }
-        };
+        // eventSource = new EventSource(`${nodeServerUrl}${path}`); // Connect to SSE endpoint
+        eventSource = fetchEventSource(`${nodeServerUrl}${path}`, 
+          {
+            headers: {
+              Authorization: `Bearer ${session?.token.idToken}`,
+            },
+            // signal,
+            onmessage : (event: any) => {
+              const eventData = JSON.parse(event.data);
+              // console.log(`all vehicles fetched=>`, event.data);
+              if (eventData.length > 0) {
+                const vehicle = eventData.map((event: any) => ({
+                  ignition: event.ignition,
+                  key: event.vehicleNumber,
+                  speed: event.speed,
+                  location: {
+                    lat: event.latitude,
+                    lng: event.longitude,
+                  },
+                }));
+                // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+                setVehicles(vehicle);
+              } else {
+                setVehicles([]);
+              }
+            }});
+        // eventSource.onmessage = (event: any) => {
+        //   const eventData = JSON.parse(event.data);
+        //   // console.log(`all vehicles fetched=>`, event.data);
+        //   if (eventData.length > 0) {
+        //     const vehicle = eventData.map((event: any) => ({
+        //       ignition: event.ignition,
+        //       key: event.vehicleNumber,
+        //       speed: event.speed,
+        //       location: {
+        //         lat: event.latitude,
+        //         lng: event.longitude,
+        //       },
+        //     }));
+        //     // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+        //     setVehicles(vehicle);
+        //   } else {
+        //     setVehicles([]);
+        //   }
+        // };
       } catch (error) {
         console.log(error);
       }
     };
     fetchRunningVehicles();
 
+    //TODO this is not working. The connection is not getting closed when navigating away from dashboard
     return () => {
-      if (eventSource) {
-        eventSource.close();
+        controller.abort();
         console.log("map SSE connection closed");
-      }
     };
   }, []);
   // }, [viewport, searchParam]);

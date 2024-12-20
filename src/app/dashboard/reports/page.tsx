@@ -27,7 +27,7 @@ export default function Page({
   // const currentPage = Number(searchParams?.page) || 1;
 
   const generateReport = () => {
-    triggerAllReportGeneration(orgId as string);
+    triggerAllReportGeneration(session?.token.idToken, orgId as string);
   };
 
   return (

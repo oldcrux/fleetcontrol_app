@@ -159,7 +159,13 @@ const GeofenceReport = () => {
         url.searchParams.set('orgId', orgId as string);
 
         // const response = await fetch(url.href);
-        const response = await axios.get(url.toString());
+        const response = await axios.get(url.toString(), 
+        {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // withCredentials: true,
+        });
 
         // console.log(`data received ${JSON.stringify(response.data)}`);
         // const json = (await response.json()) as GeofenceTelemetryReportApiResponse;       
