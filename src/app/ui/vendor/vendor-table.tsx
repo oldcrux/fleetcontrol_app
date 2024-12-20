@@ -256,8 +256,13 @@ const Vendors = () => {
         url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
         url.searchParams.set("orgId", orgId);
 
-        // console.log(`making db call: ${JSON.stringify(url)}`);
-        const response = await axios.get(url.toString());
+        const response = await axios.get(url.toString(), 
+        {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // withCredentials: true,
+        });
         // console.log(`data received ${JSON.stringify(response.data)}`);
 
         return response.data;
@@ -548,7 +553,7 @@ function useCreateVendor() {
 
   return useMutation({
     mutationFn: async (vendor: Vendor) => {
-      const status = await createVendor(orgId, userId, vendor);
+      const status = await createVendor(session?.token.idToken, orgId, userId, vendor);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -585,7 +590,7 @@ function useUpdateVendor() {
 
   return useMutation({
     mutationFn: async (vendor: Vendor) => {
-      const status = await updateVendor(orgId, vendor);
+      const status = await updateVendor(session?.token.idToken, orgId, vendor);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -613,7 +618,7 @@ function useDeleteVendor() {
   return useMutation({
     mutationFn: async (vendorId: string) => {
       //send api update request here
-      const status = await deleteVendor(userId, orgId, vendorId);
+      const status = await deleteVendor(session?.token.idToken, userId, orgId, vendorId);
       return Promise.resolve(status);
     },
     //client side optimistic update

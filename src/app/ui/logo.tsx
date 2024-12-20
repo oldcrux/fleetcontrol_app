@@ -6,7 +6,7 @@ export default function Logo() {
   const { data: session, status } = useSession();
   const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
 
-  // console.log(`printing orgid in logo`, orgId);
+  // console.log(`printing orgid in logo`, session?.user);
   return (
     // <div
     //   className={`${montserrat.className} flex flex-row items-center leading-none text-blue-600`}

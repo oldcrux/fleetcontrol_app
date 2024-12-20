@@ -4,8 +4,8 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import ReactDOM from "react-dom";
 import { useSession } from "next-auth/react";
-import { fetchAppConfig } from "@/app/lib/vehicle-utils";
 import GrafanaModal from "./grafana-modal";
+import { fetchAppConfig } from "@/app/lib/appconfig-util";
 
 type JsonPopupProps = {
   show: boolean,
@@ -29,7 +29,7 @@ export const Grafana: React.FC<JsonPopupProps> = ({
   useEffect(() => {
     const fetchUrl = async () => {
       try {
-        const fetchedUrl = await fetchAppConfig('grafanaDashboard1');
+        const fetchedUrl = await fetchAppConfig(session?.token.idToken, 'grafanaDashboard1');
         // console.log(`useEffect: url fetched: ${fetchedUrl}`);
         setUrl(fetchedUrl);
       } catch (error) {

@@ -7,6 +7,7 @@ import {
 } from "@react-google-maps/api";
 import { fetchVehiclesTravelPath } from "@/app/lib/vehicle-utils";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import { useSession } from "next-auth/react";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
 
@@ -21,10 +22,14 @@ interface TravelPathProps {
 
 const TravelPath: React.FC<TravelPathProps> = ({ vehicleNumber }) => {
   const [path, setPaths] = useState<LatLng[]>([]);
+  const { data: session } = useSession();
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : session?.user?.primaryOrgId;
 
   useEffect(() => {
     const fetchGeofences = async () => {
-      const latlngs = await fetchVehiclesTravelPath(vehicleNumber);
+      const latlngs = await fetchVehiclesTravelPath(session?.token.idToken, vehicleNumber);
       //console.log(`travel-path:useEffect: lat/lng fetched: ${JSON.stringify(latlngs)}`);
       if (latlngs.length > 0) {
         const paths = latlngs.map((geofence: any) => {
@@ -58,11 +63,13 @@ const TravelPath: React.FC<TravelPathProps> = ({ vehicleNumber }) => {
 
   const getSvgIconPathData = () => {
     const icon = <DirectionsCarIcon />;
-    const svgString = new XMLSerializer().serializeToString(icon.props.children);
+    const svgString = new XMLSerializer().serializeToString(
+      icon.props.children
+    );
     return encodeURIComponent(svgString);
   };
   const carIconUrl = `data:image/svg+xml;utf8,${getSvgIconPathData}`;
-  
+
   return (
     <div className="relative h-screen p-2">
       <GoogleMap
@@ -84,20 +91,18 @@ const TravelPath: React.FC<TravelPathProps> = ({ vehicleNumber }) => {
           }}
         />
 
-
-          <Marker
-            key={vehicleNumber}
-            position={end}
-            icon={{
-              url: carIconUrl,
-              scale: 8, // Bigger size for repeated location
-              fillColor: "blue",
-              fillOpacity: 1,
-              strokeWeight: 2,
-              strokeColor: "blue",
-            }}
-          />
-
+        <Marker
+          key={vehicleNumber}
+          position={end}
+          icon={{
+            url: carIconUrl,
+            scale: 8, // Bigger size for repeated location
+            fillColor: "blue",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "blue",
+          }}
+        />
       </GoogleMap>
     </div>
   );

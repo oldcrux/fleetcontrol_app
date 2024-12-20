@@ -218,7 +218,13 @@ const VehicleReport = () => {
         url.searchParams.set('orgId', orgId as string);
 
         // const response = await fetch(url.href);
-        const response = await axios.get(url.toString());
+        const response = await axios.get(url.toString(), 
+        {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // withCredentials: true,
+        });
 
         // console.log(`data received ${JSON.stringify(response.data)}`);
         // const json = (await response.json()) as VehicleTelemetryReportApiResponse;       
@@ -271,7 +277,7 @@ const VehicleReport = () => {
   }, [fetchMoreOnBottomReached]);
 
   const handleExportData = async () => {
-    const reportData = await latestVehicleTelemetryReport(orgId as string);
+    const reportData = await latestVehicleTelemetryReport(session?.token.idToken, orgId as string);
     const xlsFilePath = await generateVehicleExcelAndDownload(reportData);
     // const csv = generateCsv(csvConfig)(data);
   };

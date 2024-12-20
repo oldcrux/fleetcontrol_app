@@ -112,12 +112,12 @@ const Vehicles = () => {
       createdBy: userId,
       orgId: orgId
     }));
-    bulkCreateVehicle(updatedData);
+    bulkCreateVehicle(session?.token.idToken, updatedData);
   };
 
   useEffect(() => {
     const vendorNames = async () => {
-      const vendorNames = await fetchVendorNames(orgId);
+      const vendorNames = await fetchVendorNames(session?.token.idToken, orgId);
       const options = vendorNames.map((vendor: { organizationName: any }) => vendor.organizationName);
       // console.log(`geofenceGrps:`, geofenceGrps);
       setVendorNames([orgId, ...options]);
@@ -128,7 +128,7 @@ const Vehicles = () => {
 
   useEffect(() => {
     const geofenceGroups = async () => {
-      const allGeofenceGroups = await fetchGeofenceGroups(orgId);
+      const allGeofenceGroups = await fetchGeofenceGroups(session?.token.idToken, orgId);
       // console.log(`useEffect called ${JSON.stringify(allGeofenceGroups)}`, allGeofenceGroups);
       const options = allGeofenceGroups.map(
         (location: { geofenceLocationGroupName: any }) =>
@@ -298,7 +298,13 @@ const Vehicles = () => {
         url.searchParams.set("vendorId", vendorId);
 
         // console.log(`making db call: ${JSON.stringify(url)}`);
-        const response = await axios.get(url.toString());
+        const response = await axios.get(url.toString(), 
+        {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // withCredentials: true,
+        });
         // console.log(`data received ${JSON.stringify(response.data)}`);
         // const json = (await response.json()) as VehicleApiResponse;
 
@@ -604,7 +610,7 @@ function useCreateVehicle() {
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {
-      const status = await createVehicle(orgId, userId, vehicle);
+      const status = await createVehicle(session?.token.idToken, orgId, userId, vehicle);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -641,7 +647,7 @@ function useUpdateVehicle() {
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {
-      const status = await updateVehicle(orgId, vehicle);
+      const status = await updateVehicle(session?.token.idToken, orgId, vehicle);
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -669,7 +675,7 @@ function useDeleteVehicle() {
   return useMutation({
     mutationFn: async (vehicleNumber: string) => {
       //send api update request here
-      const status = await deleteVehicle(userId, orgId, vehicleNumber);
+      const status = await deleteVehicle(session?.token.idToken, userId, orgId, vehicleNumber);
       return Promise.resolve(status);
     },
     //client side optimistic update

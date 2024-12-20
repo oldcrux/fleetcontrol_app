@@ -346,7 +346,7 @@ function useUpdateVehicle() {
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {
-      const status = await updateVehicle(orgId as string, vehicle);
+      const status = await updateVehicle(session?.token.idToken, orgId as string, vehicle);
       return Promise.resolve(status);
     },
     //client side optimistic update

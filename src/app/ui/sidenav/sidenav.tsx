@@ -15,6 +15,7 @@ export default function SideNav() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  console.log(`id_token:`, session?.token.idToken);
   const toggleSidenav = () => {
     setIsCollapsed((prev) => !prev);
   };
@@ -27,7 +28,6 @@ export default function SideNav() {
     await signOutAction();
     // Add any additional sign-out logic here
   };
-
   return (
     <div
       className={`flex ${
@@ -65,7 +65,7 @@ export default function SideNav() {
                 variant="body2"
                 sx={{ fontWeight: 500, lineHeight: "16px" }}
               >
-                {user?.userId}
+              {user?.name || user?.userId || ""}
               </Typography>
               <Typography variant="caption" sx={{ color: "grey" }}>
                 {user?.email}

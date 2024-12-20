@@ -3,18 +3,17 @@ import { montserrat } from "@/app/ui/fonts";
 import { Button } from "@/app/ui/button";
 import { useEffect, useState } from "react";
 import { authenticate } from "../lib/actions";
-import { getSession } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Logo from "./logo";
-import { colors, Typography } from "@mui/material";
+import Image from "next/image";
 
 export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
-  const [redirectToDashboard, setRedirectToDashboard] = useState(false);
+  // const [redirectToDashboard, setRedirectToDashboard] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (event:any) => {
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
     setIsPending(true);
     setErrorMessage(""); // Reset error message
@@ -24,10 +23,10 @@ export default function LoginForm() {
     const password = formData.get("password");
 
     try {
-      if (typeof userId === 'string' && typeof password === 'string') {
+      if (typeof userId === "string" && typeof password === "string") {
         await authenticate({ userId, password });
       } else {
-        console.error('Invalid form data');
+        console.error("Invalid form data");
       }
 
       // Poll for session status
@@ -43,7 +42,7 @@ export default function LoginForm() {
         }
       }, 500); // Check every 1/2 second
     } catch (error) {
-      setErrorMessage("Invalid Credential");
+      setErrorMessage(`Invalid Credential`);
     } finally {
       setIsPending(false);
     }
@@ -62,18 +61,17 @@ export default function LoginForm() {
   //   };
   // }, []);
 
+
+
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-blue-200 px-6 pb-4 pt-8">
+      <div className="flex flex-col items-center justify-center flex-1 rounded-lg bg-blue-200 px-6 pb-4 pt-8">
         <div className="mb-10  w-full flex flex-col items-center">
-        <div
-          className={`${montserrat.className} text-xl text-blue-600`}>
-          OldCrux
-        </div>  
-        <div
-          className={`text-3xl text-blue-600`}>
-          Fleet Dashboard
-        </div> 
+          <div className={`${montserrat.className} text-xl text-blue-600`}>
+            OldCrux
+          </div>
+          <div className={`text-3xl text-blue-600`}>Fleet Dashboard</div>
         </div>
         <h1 className={`mb-3 text-2xl text-blue-800`}>Sign In</h1>
         <div className="w-full">
@@ -121,6 +119,21 @@ export default function LoginForm() {
         >
           {isPending ? "Logging in..." : "Log in"}
         </Button>
+
+        <Button
+          className="mt-4 flex bg-transparent hover:bg-transparent active:bg-transparent p-0"
+          onClick={() => signIn("google")}
+          style={{ width: "auto", height: "auto" }}
+        >
+          <Image
+            alt="Google Sign In"
+            src={`/images/google_signin.svg`}
+            width={150}
+            height={150}
+            className="object-contain"
+          />
+        </Button>
+
         <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"
@@ -132,5 +145,6 @@ export default function LoginForm() {
         </div>
       </div>
     </form>
+    </>
   );
 }

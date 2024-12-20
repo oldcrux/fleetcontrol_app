@@ -31,7 +31,7 @@ const Drawing = () => {
   const orgId = session?.user?.secondaryOrgId
     ? session?.user?.secondaryOrgId
     : session?.user?.primaryOrgId;
-  const userId = session?.user?.id;
+  const userId = session?.user?.userId;
 
   const [isBulkCreateModalOpen, setIsBulkCreateModalOpen] = useState(false);
   const [isGeofenceListModalOpen, setIsGeofenceListModalOpen] = useState(false);
@@ -46,7 +46,7 @@ const Drawing = () => {
       orgId: orgId,
     }));
 
-    bulkCreateGeofences(updatedData);
+    bulkCreateGeofences(session?.token.idToken, updatedData);
   };
 
   const attachClickListener = (shape: any, index: any) => {
@@ -113,7 +113,7 @@ const Drawing = () => {
 
         const query = `geofenceLocationGroupName=${geofenceLocationGroup}`;
         // console.log(`useEffect called with query`, query);
-        const geofences = await fetchGeofence(orgId as string, query);
+        const geofences = await fetchGeofence(session?.token.idToken, orgId as string, query);
 
         if (geofences.length > 0) {
           // console.log(`dashboardmap:useEffect: geofences fetched: ` , geofences);
@@ -212,7 +212,7 @@ const Drawing = () => {
     console.log(
       `drawing:saveShapes: geofence data to save ${geofenceDataToSave} with groupname ${geofenceLocationGroup}`
     );
-    createGeofence(geofenceDataToSave);
+    createGeofence(session?.token.idToken, geofenceDataToSave);
   };
 
   const debouncedSetGroup = useDebouncedCallback((value) => {
@@ -246,6 +246,8 @@ const Drawing = () => {
       setActiveShapeIndex(null); // Reset active shape
     }
     deleteGeofenceLocation(
+      session?.token.idToken, 
+      session?.user.userId as string,
       orgId as string,
       selectedShape.tag,
       selectedShape.id

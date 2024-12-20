@@ -81,19 +81,19 @@ const VehicleModal = (label: any) => {
       // console.log(`orgId fetched from session: ${orgId}`);
       if (typeof window !== "undefined") {
         if (label.label === "Ghost") {
-          const offVehicles = await fetchGhostVehicles(orgId as string, vendorId as string);
+          const offVehicles = await fetchGhostVehicles(session?.token.idToken, orgId as string, vendorId as string);
           setData(offVehicles);
         } else if (label.label === "Off") {
-          const offVehicles = await fetchVehiclesIgnitionOff(orgId as string, vendorId as string);
+          const offVehicles = await fetchVehiclesIgnitionOff(session?.token.idToken, orgId as string, vendorId as string);
           setData(offVehicles);
         } else if (label.label === "Idle") {
-          const idleVehicles = await fetchAllIdleVehicles(orgId as string, vendorId as string);
+          const idleVehicles = await fetchAllIdleVehicles(session?.token.idToken, orgId as string, vendorId as string);
           setData(idleVehicles);
         } else if (label.label === "Running") {
-          const runningVehicles = await fetchAllRunningVehicles(orgId as string, vendorId as string);
+          const runningVehicles = await fetchAllRunningVehicles(session?.token.idToken, orgId as string, vendorId as string);
           setData(runningVehicles);
         } else if (label.label === "Speeding") {
-          const speedingVehicles = await fetchAllSpeedingVehicles(orgId as string, vendorId as string);
+          const speedingVehicles = await fetchAllSpeedingVehicles(session?.token.idToken, orgId as string, vendorId as string);
           setData(speedingVehicles);
         }
         setIsLoading(false);

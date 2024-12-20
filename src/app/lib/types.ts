@@ -19,6 +19,7 @@ declare module 'next-auth' {
 
   interface Session {
     user: User;
+    token: any;
   }
 }
 
@@ -108,4 +109,5 @@ export interface User {
   state: string;
   country: string;
   zip: string;
+  isActive: boolean;
 }
