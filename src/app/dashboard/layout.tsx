@@ -4,15 +4,18 @@ import SideNav from "@/app/ui/sidenav/sidenav";
 import { useSession } from "next-auth/react";
 import { Box, Button, Typography } from "@mui/material";
 import { signOutAction } from "@/app/lib/actions";
+import checkTokenForExpiryAndLogout from "../session-check";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const role = session?.user.role;
   const orgId = session?.user.primaryOrgId;
 
-  const handleSignOut = async () => {
+  const handleLogOut = async () => {
     await signOutAction();
   };
+
+  checkTokenForExpiryAndLogout();
 
   return (
     // <div className="flex h-screen flex-col md:flex-row md:overflow-hidden bg-blend-lighten">
@@ -44,7 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Typography variant="h6" color="error" align="center" sx={{ mb: 2 }}>
             Unauthorized access
           </Typography>
-          <Button variant="contained" color="primary" onClick={handleSignOut}>
+          <Button variant="contained" color="primary" onClick={handleLogOut}>
             Sign Out
           </Button>
         </Box>

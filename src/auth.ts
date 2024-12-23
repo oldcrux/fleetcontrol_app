@@ -144,12 +144,10 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
     id: user.id,
     email: user.email,
     role: user.role,
-    iss: "oldcruxlocaldatabase"
+    iss: "oldcruxdb"
   };
-
   const idToken = jwt.sign(payload, process.env.AUTH_SECRET? process.env.AUTH_SECRET : '', {
-    expiresIn: "3h", // Token validity duration
+    expiresIn: maxage, // Token validity duration
   });
-  // console.log(`id token created:`,idToken);
   return idToken;
 }
