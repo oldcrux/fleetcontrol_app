@@ -1,12 +1,11 @@
+import LoginForm from "@/app/ui/login-form";
+import React from "react";
+import Logo from "../ui/logo";
+import { Box, Container } from "@mui/material";
+import Banner from "../ui/info-banner";
 
-import LoginForm from '@/app/ui/login-form';
-import React from 'react';
-import Logo from '../ui/logo';
-import { Box, Container } from '@mui/material';
-import Banner from '../ui/info-banner';
- 
 export default function LoginPage() {
-  
+
   return (
     // <main className="flex items-center justify-center md:h-screen">
     //   <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
@@ -24,10 +23,9 @@ export default function LoginPage() {
         p: 2, // Padding for smaller screens
       }}
     >
-      <Box>
-              <Banner
-              />
-          </Box>
+        <Box>
+          {/* <Banner /> */}
+        </Box>
       <Container
         maxWidth="xs"
         sx={{

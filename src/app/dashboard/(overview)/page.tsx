@@ -32,7 +32,7 @@ export default async function Page({
               <Search placeholder="Search Vehicles..." />
             </Tooltip>
           </div> */}
-          <div className="absolute right-4 top-4 lg:absolute lg:top-4 lg:right-4">
+        <div className="absolute sm:top-3 right-4 sm:right-1 lg:top-4 lg:right-4">
             <LiveWidget />
           </div>
         </div>

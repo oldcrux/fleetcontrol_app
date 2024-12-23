@@ -1,11 +1,14 @@
 "use client";
 import { montserrat } from "@/app/ui/fonts";
-import { Button } from "@/app/ui/button";
+// import { Button } from "@/app/ui/button";
 import { useEffect, useState } from "react";
 import { authenticate } from "../lib/actions";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Divider from "@mui/material/Divider";
+import { Box, Typography, Button, TextField } from "@mui/material";
+import { grey } from "@mui/material/colors";
 
 export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -48,103 +51,148 @@ export default function LoginForm() {
     }
   };
 
-  // useEffect(() => {
-  //   if (redirectToDashboard) {
-  //     router.push("/dashboard"); // Redirect after session is confirmed
-  //   }
-  // }, [redirectToDashboard, router]);
-
-  // useEffect(() => {
-  //   // Cleanup on unmount
-  //   return () => {
-  //     clearInterval(); // This should be defined properly if needed
-  //   };
-  // }, []);
-
-
-
   return (
     <>
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="flex flex-col items-center justify-center flex-1 rounded-lg bg-blue-200 px-6 pb-4 pt-8">
-        <div className="mb-10  w-full flex flex-col items-center">
-          <div className={`${montserrat.className} text-xl text-blue-600`}>
-            OldCrux
-          </div>
-          <div className={`text-3xl text-blue-600`}>Fleet Dashboard</div>
-        </div>
-        <h1 className={`mb-3 text-2xl text-blue-800`}>Sign In</h1>
-        <div className="w-full">
-          <div>
-            <label
-              className="mt-5 block text-lg font-medium text-blue-800"
-              htmlFor="userId"
-            >
-              Username
-            </label>
-            <div className="relative">
-              <input
-                className="peer block w-full rounded-md border text-black border-gray-200 py-[9px] pl-2 text-sm outline-2 placeholder:text-gray-500"
-                id="userId"
-                type="text"
-                name="userId"
-                placeholder="Enter your userId"
-                required
-              />
-            </div>
-          </div>
-          <div className="mt-4">
-            <label
-              className="mt-5 block text-lg font-medium text-blue-800"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <input
-                className="peer block w-full rounded-md border text-black border-gray-200 py-[9px] pl-2 text-sm outline-2 placeholder:text-gray-500"
-                id="password"
-                type="password"
-                name="password"
-                placeholder="Enter password"
-                required
-                minLength={5}
-              />
-            </div>
-          </div>
-        </div>
-        <Button
-          className="mt-4 w-full flex justify-center"
-          aria-disabled={isPending}
+      <form onSubmit={handleSubmit}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+            borderRadius: "8px",
+            backgroundColor: "#bfdbfe",
+            padding: "24px",
+            width: "100%",
+          }}
         >
-          {isPending ? "Logging in..." : "Log in"}
-        </Button>
+          <Box sx={{ textAlign: "center", mb: 5 }}>
+            <Typography
+              variant="h5"
+              color="primary"
+              fontWeight="normal"
+              className={montserrat.className}
+            >
+              OldCrux
+            </Typography>
+            <Typography variant="h4" color="primary">
+              Fleet Dashboard
+            </Typography>
+          </Box>
 
-        <Button
-          className="mt-4 flex bg-transparent hover:bg-transparent active:bg-transparent p-0"
-          onClick={() => signIn("google")}
-          style={{ width: "auto", height: "auto" }}
-        >
-          <Image
-            alt="Google Sign In"
-            src={`/images/google_signin.svg`}
-            width={150}
-            height={150}
-            className="object-contain"
+          <Typography variant="h5" color="textPrimary" gutterBottom>
+            Sign In
+          </Typography>
+
+          <TextField
+            label="Username"
+            id="userId"
+            name="userId"
+            type="text"
+            fullWidth
+            required
+            sx={{
+              mb: 2,
+              backgroundColor: "#f5f5f5",
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "#f5f5f5",
+              },
+              "& .MuiInputLabel-root": {
+                color: "#555",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#bbb",
+              },
+            }}
+            placeholder="Enter your userId"
           />
-        </Button>
 
-        <div
-          className="flex h-8 items-end space-x-1"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {errorMessage && (
-            <p className="text-sm text-red-500">{errorMessage}</p>
-          )}
-        </div>
-      </div>
-    </form>
+          <TextField
+            label="Password"
+            id="password"
+            name="password"
+            type="password"
+            fullWidth
+            required
+            sx={{
+              mb: 2,
+              backgroundColor: "#f5f5f5",
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "#f5f5f5",
+              },
+              "& .MuiInputLabel-root": {
+                color: "#555",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#bbb",
+              },
+            }}
+            placeholder="Enter password"
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mb: 2 }}
+            disabled={isPending}
+          >
+            {isPending ? "Logging in..." : "Log in"}
+          </Button>
+
+          <Divider
+            sx={{
+              width: "100%",
+              my: 2,
+              borderColor: "gray",
+              borderBottomWidth: 2,
+            }}
+          >
+            <Typography variant="body2" color="textSecondary" sx={{ px: 2 }}>
+              Or
+            </Typography>
+          </Divider>
+
+          <Button
+            onClick={() => signIn("google")}
+            sx={{
+              padding: 0,
+              width: "auto",
+              height: "auto",
+              "&:hover": {
+                backgroundColor: "transparent",
+              },
+            }}
+          >
+            <img
+              src="/images/google_signin.svg"
+              alt="Google Sign In"
+              style={{
+                width: 150,
+                height: 50,
+                objectFit: "contain",
+              }}
+            />
+          </Button>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mt: 1,
+            }}
+          >
+            {errorMessage && (
+              <Typography variant="body2" color="error">
+                {errorMessage}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </form>
     </>
   );
 }

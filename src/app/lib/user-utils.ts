@@ -3,7 +3,7 @@ import { User } from './types';
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
 export async function createUser(idToken: string, orgId: string, userId: string, user: User) {
-    console.log(`create user data ${JSON.stringify(user)}`);
+    // console.log(`create user data ${JSON.stringify(user)}`);
     if(user.primaryOrgId !== orgId){
         user.secondaryOrgId=orgId;
         user.role='view';
@@ -32,10 +32,10 @@ export async function createUser(idToken: string, orgId: string, userId: string,
     return response.status;
   }
   
-  export async function updatePassword(idToken: string, orgId: string, user: User) {
-    // console.log(`updating vehicle data ${JSON.stringify(vehicle)}`);
+  export async function updatePassword(idToken: string, user: any) {
+    // console.log(`updating user data ${JSON.stringify(user)}`);
     // user.orgId = orgId;
-    const response = await axios.post(`${nodeServerUrl}/node/api/user/update`, user, {
+    const response = await axios.post(`${nodeServerUrl}/node/api/user/updatePassword`, user, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${idToken}`,

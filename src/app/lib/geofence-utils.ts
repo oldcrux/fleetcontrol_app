@@ -25,7 +25,7 @@ export async function createGeofence(idToken: string, geofenceDataToSave: string
 
 export async function updateGeofence(idToken: string, geofenceDataToSave: any) {
 
-  console.log(`Geofence data to save:`, geofenceDataToSave);
+  // console.log(`Geofence data to save:`, geofenceDataToSave);
   // console.log(`geofenceutils:updateGeofence: updating geofence ${JSON.stringify(geofenceDataToSave)}`, geofenceDataToSave);
   const response = await axios.post(`${nodeServerUrl}/node/api/geofence/update`, geofenceDataToSave,
     {

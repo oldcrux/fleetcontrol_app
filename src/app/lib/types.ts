@@ -92,6 +92,7 @@ export interface Vendor {
 export interface User {
   // Id?: string;
   userId:string;
+  authType:string;
   password:string;
   role:string;
   primaryOrgId: string;
