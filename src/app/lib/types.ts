@@ -51,7 +51,7 @@ export interface Vehicle {
   vehicleNumber: string;
   make: string;
   model: string;
-  owner: string;
+  vendorId: string;
   primaryPhoneNumber: string;
   secondaryPhoneNumber: string;
   serialNumber: string;
