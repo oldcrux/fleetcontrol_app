@@ -425,7 +425,7 @@ export default Geofences;
 const validateRequired = (value: string) => !!value.length;
 const validateRequiredNumber = (value: any) => {
   const numValue = Number(value);
-  return !isNaN(numValue) && numValue.toString().length === 10;
+  return !isNaN(numValue);
 };
 
 function validateGeofence(geofence: Geofence) {

@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from '@mui/icons-material/Info';
 
 interface BannerProps {
-  onClose: () => void;
+  // onClose: () => void;
 }
 
 const Banner: React.FC<BannerProps> = () => {
@@ -34,7 +34,7 @@ const Banner: React.FC<BannerProps> = () => {
           fontSize: { xs: "0.875rem", sm: "1rem", md: "1rem" }, // Same responsive font size
         }}
       >
-        {`Password based login is being retired and will not be available after 31st December 2024.  
+        {`Password based login is being retired and will not be available after 15th January 2025.  
         Please reach out to your admin for continued access.`}
       </Typography>
       {/* <IconButton

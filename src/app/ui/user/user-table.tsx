@@ -50,6 +50,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { createUser, deleteUser, updateUser } from "@/app/lib/user-utils";
 import { fetchVendorNames } from "@/app/lib/org-utils";
+import { ChangePassword } from "./change_password";
+import bcrypt from 'bcryptjs';
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -78,6 +80,7 @@ const Users = () => {
   >({});
   const [vendorNames, setVendorNames] = useState<string[]>(["None"]);
   const [selectedVendor, setSelectedVendor] = useState<string>();
+  const [selectedAuthType, setSelectedAuthType] = useState<string>();
 
   const { data: session } = useSession();
   const orgId = session?.user?.secondaryOrgId
@@ -87,11 +90,15 @@ const Users = () => {
   const role = session?.user?.role;
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [passwordVisible, setPasswordVisible] = useState(false);
-
+  const [password, setPassword] = useState<string>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   useEffect(() => {
     const vendorNames = async () => {
       const vendorNames = await fetchVendorNames(session?.token.idToken, orgId);
-      const options = vendorNames.map((vendor: { organizationName: any }) => vendor.organizationName);
+      const options = vendorNames.map(
+        (vendor: { organizationName: any }) => vendor.organizationName
+      );
       // console.log(`geofenceGrps:`, geofenceGrps);
       setVendorNames([orgId, ...options]);
       // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
@@ -119,11 +126,19 @@ const Users = () => {
       {
         accessorKey: "isActive",
         header: "Active?",
-        editVariant: 'select',
+        editVariant: "select",
         editSelectOptions: ["true", "false"],
-        accessorFn: (originalRow) => (originalRow.isActive ? 'true' : 'false'),
-        Cell: ({ cell }) =>
-          cell.getValue() === 'true' ? 'true' : 'false',
+        accessorFn: (originalRow) => (originalRow.isActive ? "true" : "false"),
+        Cell: ({ cell }) => (
+          <span
+            style={{
+              color: cell.getValue() === "true" ? "green" : "red",
+              fontSize: "18px",
+            }}
+          >
+            {cell.getValue() === "true" ? "✔" : "❌"}
+          </span>
+        ),
       },
       {
         accessorKey: "firstName",
@@ -220,21 +235,47 @@ const Users = () => {
         }),
       },
       {
+        accessorKey: "authType",
+        header: "Authentication Type",
+        editVariant: "select",
+        editSelectOptions: ["db", "others"],
+        muiEditTextFieldProps: ({ row }) => ({
+          required: true,
+          error: !!validationErrors?.role,
+          helperText: validationErrors?.role,
+          onChange: (event) => {
+            const selectedAuthType = event.target.value;
+            setSelectedAuthType(selectedAuthType);
+          },
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              role: undefined,
+            }),
+        }),
+      },
+      {
         accessorKey: "password",
         header: "Password",
-        Cell: ({ row }) => "*****",
+        Cell: ({ row }) => "********",
         muiEditTextFieldProps: ({ row }) => ({
-        //   disabled: row.original.password? true: false,
-          // required: true,
+          disabled: row.original.authType !== "db" && selectedAuthType !== "db",
+          required: selectedAuthType === "db",
           type: passwordVisible ? "text" : "password",
           error: !!validationErrors?.password,
           helperText: validationErrors?.password,
+          value: password,
+          onChange: (event) => {
+            setPassword(event.target.value);
+          },
           onFocus: () =>
             setValidationErrors((prev) => ({ ...prev, password: undefined })),
           InputProps: {
             endAdornment: (
               <IconButton
-                // disabled={row.original.password? true: false}
+                disabled={
+                  row.original.authType !== "db" && selectedAuthType !== "db"
+                }
                 onClick={() => setPasswordVisible((prev) => !prev)}
                 edge="end"
               >
@@ -319,7 +360,14 @@ const Users = () => {
         },
       },
     ],
-    [passwordVisible, vendorNames, selectedVendor, validationErrors]
+    [
+      passwordVisible,
+      vendorNames,
+      selectedVendor,
+      selectedAuthType,
+      password,
+      validationErrors,
+    ]
   );
 
   const { data, fetchNextPage, isError, isFetching, isLoading, refetch } =
@@ -343,8 +391,7 @@ const Users = () => {
         url.searchParams.set("orgId", orgId);
 
         // console.log(`making db call: ${JSON.stringify(url)}`);
-        const response = await axios.get(url.toString(), 
-        {
+        const response = await axios.get(url.toString(), {
           headers: {
             Authorization: `Bearer ${session?.token.idToken}`,
           },
@@ -475,7 +522,7 @@ const Users = () => {
     // enableGlobalFilter: false,
     // enableFilters: false,
     enableDensityToggle: false,
-
+    enableRowSelection: true,
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleCreateUser,
     onEditingRowCancel: () => setValidationErrors({}),
@@ -576,8 +623,8 @@ const Users = () => {
 
     renderTopToolbarCustomActions: ({ table }) => (
       <>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {role !== "view" && (
+        {role !== "view" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Button
               disabled={Object.keys(rowSelection).length !== 0}
               onClick={() => {
@@ -594,8 +641,18 @@ const Users = () => {
             >
               Create New User
             </Button>
-          )}
-        </div>
+            <Button
+              disabled={
+                Object.keys(rowSelection).length === 0 ||
+                Object.keys(rowSelection).length > 1
+              }
+              onClick={() => setIsModalOpen(true)}
+            >
+              Change Password
+            </Button>
+            <ChangePassword user={Object.keys(rowSelection)} show={isModalOpen} onClose={() => setIsModalOpen(false)}/>
+          </div>
+        )}
       </>
     ),
     // initialState: {
@@ -650,7 +707,14 @@ function useCreateUser() {
 
   return useMutation({
     mutationFn: async (user: User) => {
-      const status = await createUser(session?.token.idToken, orgId, userId, user);
+      const password = await bcrypt.hash(user.password, 10);
+      user.password = password;
+      const status = await createUser(
+        session?.token.idToken,
+        orgId,
+        userId,
+        user
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -711,13 +775,20 @@ function useDeleteUser() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : (session?.user?.primaryOrgId as string);
-  const loggedInUserId = session?.user?.id as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
+  const loggedInUserId = session?.user?.userId as string;
 
   return useMutation({
     mutationFn: async (userId: string) => {
       //send api update request here
-      const status = await deleteUser(session?.token.idToken, userId, orgId, loggedInUserId);
+      const status = await deleteUser(
+        session?.token.idToken,
+        userId,
+        orgId,
+        loggedInUserId
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -748,7 +819,9 @@ const validateRequiredNumber = (value: any) => {
   const numValue = Number(value);
   return !isNaN(numValue) && numValue.toString().length === 10;
 };
-
+const passwordValidateRequired = (authType: string, value: string) => {
+  return authType==='db' && value.length < 8;
+}
 
 function validateUser(user: User) {
   return {
@@ -763,6 +836,7 @@ function validateUser(user: User) {
     phoneNumber: !validateRequired(user.phoneNumber)
       ? "Phone Number is Required"
       : "",
+      password: passwordValidateRequired(user.authType, user.password) ? "Password must be at least 8 characters." : "",
     email: !validateRequired(user.email) ? "Email is Required" : "",
     address1: !validateRequired(user.address1) ? "Address1 is Required" : "",
     city: !validateRequired(user.city) ? "City is Required" : "",
