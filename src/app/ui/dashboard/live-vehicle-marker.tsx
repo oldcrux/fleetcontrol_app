@@ -155,6 +155,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
           orgId,
           vehicleNumber
         );
+        console.log(fetchedVehicle);
         setVehicle(fetchedVehicle); // Update state with fetched vehicle
       } catch (error) {
         console.error("Error fetching vehicle:", error);
@@ -208,7 +209,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
             <div>Position: {`lat: ${position.lat}, lng: ${position.lng}`}</div>
             <div>Speed: {speed}</div>
             <div>Ph: {vehicle?.primaryPhoneNumber}</div>
-            <div>Owner: {vehicle?.owner}</div>
+            <div>Vendor: {vehicle?.vendorId}</div>
             <button
               className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
               onClick={getInsights}
