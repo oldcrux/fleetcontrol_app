@@ -41,13 +41,13 @@ import {
   useMutation,
   useQuery,
 } from "@tanstack/react-query"; //Note: this is TanStack React Query V5
-
+import DomainAddOutlinedIcon from "@mui/icons-material/DomainAddOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import { Button } from "../button";
 import { Vendor } from "@/app/lib/types";
 import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import { createVendor, deleteVendor, updateVendor } from "@/app/lib/org-utils";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
@@ -79,7 +79,9 @@ const Vendors = () => {
     "None",
   ]);
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.userId || "";
   const role = session?.user?.role;
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
@@ -87,150 +89,150 @@ const Vendors = () => {
   const columns = useMemo<MRT_ColumnDef<Vendor>[]>(
     () => [
       {
-        accessorKey: 'organizationName',
-        header: 'Vendor Name',
+        accessorKey: "organizationName",
+        header: "Vendor Name",
         muiEditTextFieldProps: ({ row }) => ({
-            disabled: row.original.orgId ? true : false,
-            required: true,
-            error: !!validationErrors?.organizationName,
-            helperText: validationErrors?.organizationName,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                organizationName: undefined,
-              }),
-          }),
+          disabled: row.original.orgId ? true : false,
+          required: true,
+          error: !!validationErrors?.organizationName,
+          helperText: validationErrors?.organizationName,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              organizationName: undefined,
+            }),
+        }),
       },
       {
-        accessorKey: 'orgId',
-        header: 'VendorId',
+        accessorKey: "orgId",
+        header: "VendorId",
         muiEditTextFieldProps: ({ row }) => ({
-            disabled: row.original.orgId ? true : false,
-            required: true,
-            error: !!validationErrors?.orgId,
-            helperText: validationErrors?.orgId,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                orgId: undefined,
-              }),
-          }),
+          disabled: row.original.orgId ? true : false,
+          required: true,
+          error: !!validationErrors?.orgId,
+          helperText: validationErrors?.orgId,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              orgId: undefined,
+            }),
+        }),
       },
       {
-        accessorKey: 'primaryContactName',
-        header: 'Contact Name',
+        accessorKey: "primaryContactName",
+        header: "Contact Name",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.primaryContactName,
-            helperText: validationErrors?.primaryContactName,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                primaryContactName: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.primaryContactName,
+          helperText: validationErrors?.primaryContactName,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              primaryContactName: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'primaryPhoneNumber',
-        header: 'Phone Number',
+        accessorKey: "primaryPhoneNumber",
+        header: "Phone Number",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.primaryPhoneNumber,
-            helperText: validationErrors?.primaryPhoneNumber,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                primaryPhoneNumber: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.primaryPhoneNumber,
+          helperText: validationErrors?.primaryPhoneNumber,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              primaryPhoneNumber: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'primaryEmail',
-        header: 'Email',
+        accessorKey: "primaryEmail",
+        header: "Email",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.primaryEmail,
-            helperText: validationErrors?.primaryEmail,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                primaryEmail: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.primaryEmail,
+          helperText: validationErrors?.primaryEmail,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              primaryEmail: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'address1',
-        header: 'Address1',
+        accessorKey: "address1",
+        header: "Address1",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.address1,
-            helperText: validationErrors?.address1,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                address1: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.address1,
+          helperText: validationErrors?.address1,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              address1: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'address2',
-        header: 'Address2',
+        accessorKey: "address2",
+        header: "Address2",
       },
       {
-        accessorKey: 'city',
-        header: 'City',
+        accessorKey: "city",
+        header: "City",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.city,
-            helperText: validationErrors?.city,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                city: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.city,
+          helperText: validationErrors?.city,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              city: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'state',
-        header: 'State',
+        accessorKey: "state",
+        header: "State",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.state,
-            helperText: validationErrors?.state,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                state: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.state,
+          helperText: validationErrors?.state,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              state: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'country',
-        header: 'Country',
+        accessorKey: "country",
+        header: "Country",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.country,
-            helperText: validationErrors?.country,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                country: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.country,
+          helperText: validationErrors?.country,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              country: undefined,
+            }),
+        },
       },
       {
-        accessorKey: 'zip',
-        header: 'Zip',
+        accessorKey: "zip",
+        header: "Zip",
         muiEditTextFieldProps: {
-            required: true,
-            error: !!validationErrors?.zip,
-            helperText: validationErrors?.zip,
-            onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                zip: undefined,
-              }),
-          },
+          required: true,
+          error: !!validationErrors?.zip,
+          helperText: validationErrors?.zip,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              zip: undefined,
+            }),
+        },
       },
     ],
     [geofenceGroupNames, validationErrors]
@@ -256,8 +258,7 @@ const Vendors = () => {
         url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
         url.searchParams.set("orgId", orgId);
 
-        const response = await axios.get(url.toString(), 
-        {
+        const response = await axios.get(url.toString(), {
           headers: {
             Authorization: `Bearer ${session?.token.idToken}`,
           },
@@ -360,7 +361,11 @@ const Vendors = () => {
 
   //DELETE action
   const openDeleteConfirmModal = async (row: MRT_Row<Vendor>) => {
-    if (window.confirm(`Are you sure you want to delete Vendor ${row.original.orgId} ?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete Vendor ${row.original.orgId} ?`
+      )
+    ) {
       await deleteVendor(row.original.orgId);
     }
     refetch();
@@ -387,12 +392,11 @@ const Vendors = () => {
     onEditingRowSave: handleSaveVendor,
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
-    enableEditing: role !== 'view',
+    enableEditing: role !== "view",
     getRowId: (row) => row.orgId,
 
-    enableRowSelection:true,
+    enableRowSelection: true,
 
-    
     // muiTableBodyRowProps: ({ row }) => ({
     //   onClick: () =>
     //     setRowSelection((prev) => {
@@ -484,23 +488,25 @@ const Vendors = () => {
 
     renderTopToolbarCustomActions: ({ table }) => (
       <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      {role !=='view' && <Button disabled={Object.keys(rowSelection).length !== 0}
-        onClick={() => {
-          // console.log(`setting creating flag to true`);
-          // setCreating(true);
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
-        }}
-      >
-        Create New Vendor
-      </Button> }
-       </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {role !== "view" && (
+            <Button
+              disabled={Object.keys(rowSelection).length !== 0}
+              onClick={() => {
+                // console.log(`setting creating flag to true`);
+                // setCreating(true);
+                table.setCreatingRow(true);
+              }}
+              icon={
+                <DomainAddOutlinedIcon
+                  sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+                />
+              }
+            >
+              Create New Vendor
+            </Button>
+          )}
+        </div>
       </>
     ),
     // initialState: {
@@ -534,7 +540,7 @@ const Vendors = () => {
       showProgressBars: isFetching,
       sorting,
       isSaving: isCreatingVendor || isUpdatingVendor || isDeletingVendor,
-      rowSelection
+      rowSelection,
     },
     rowVirtualizerInstanceRef, //get access to the virtualizer instance
     rowVirtualizerOptions: { overscan: 4 },
@@ -548,12 +554,19 @@ function useCreateVendor() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.userId || "";
 
   return useMutation({
     mutationFn: async (vendor: Vendor) => {
-      const status = await createVendor(session?.token.idToken, orgId, userId, vendor);
+      const status = await createVendor(
+        session?.token.idToken,
+        orgId,
+        userId,
+        vendor
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -586,7 +599,9 @@ function useUpdateVendor() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
 
   return useMutation({
     mutationFn: async (vendor: Vendor) => {
@@ -612,13 +627,20 @@ function useDeleteVendor() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.id as string;
 
   return useMutation({
     mutationFn: async (vendorId: string) => {
       //send api update request here
-      const status = await deleteVendor(session?.token.idToken, userId, orgId, vendorId);
+      const status = await deleteVendor(
+        session?.token.idToken,
+        userId,
+        orgId,
+        vendorId
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -631,7 +653,6 @@ function useDeleteVendor() {
     },
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['vehicles'] }), //refetch vehicles after mutation, disabled for demo
   });
-  
 }
 
 const queryClient = new QueryClient();
@@ -657,35 +678,23 @@ const validateSerialNumber = (value: any) => {
 
 function validateVendor(vendor: Vendor) {
   return {
-    orgId: !validateRequired(vendor.orgId)
-      ? "VendorId is Required"
-      : "",
+    orgId: !validateRequired(vendor.orgId) ? "VendorId is Required" : "",
     organizationName: !validateRequired(vendor.organizationName)
       ? "Organization Name is Required"
       : "",
-      primaryContactName: !validateRequired(vendor.primaryContactName)
+    primaryContactName: !validateRequired(vendor.primaryContactName)
       ? "Contact Name is Required"
       : "",
-      primaryPhoneNumber: !validateRequired(vendor.primaryPhoneNumber)
+    primaryPhoneNumber: !validateRequired(vendor.primaryPhoneNumber)
       ? "Phone Number is Required"
       : "",
-      primaryEmail: !validateRequired(vendor.primaryEmail)
+    primaryEmail: !validateRequired(vendor.primaryEmail)
       ? "Email is Required"
       : "",
-      address1: !validateRequired(vendor.address1)
-      ? "Address1 is Required"
-      : "",
-      city: !validateRequired(vendor.city)
-      ? "City is Required"
-      : "",
-      state: !validateRequired(vendor.state)
-      ? "State is Required"
-      : "",
-      country: !validateRequired(vendor.country)
-      ? "Country is Required"
-      : "",
-      zip: !validateRequired(vendor.zip)
-      ? "Zip is Required"
-      : "",
+    address1: !validateRequired(vendor.address1) ? "Address1 is Required" : "",
+    city: !validateRequired(vendor.city) ? "City is Required" : "",
+    state: !validateRequired(vendor.state) ? "State is Required" : "",
+    country: !validateRequired(vendor.country) ? "Country is Required" : "",
+    zip: !validateRequired(vendor.zip) ? "Zip is Required" : "",
   };
 }
