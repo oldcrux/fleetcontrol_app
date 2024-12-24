@@ -3,7 +3,6 @@ import { lusitana, montserrat, roboto } from "@/app/ui/fonts";
 import "./globals.css";
 import GoogleMapProvider from "./google-map-provider";
 import { SessionProvider } from "next-auth/react";
-import { AppProps } from "next/app";
 import { auth } from "@/auth";
 
 export const metadata: Metadata = {

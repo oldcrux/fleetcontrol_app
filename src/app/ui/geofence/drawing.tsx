@@ -16,6 +16,10 @@ import { useDebouncedCallback } from "use-debounce";
 import { Shape } from "@/app/lib/types";
 import { BulkCreateGeofences } from "./bulk-create-geofences";
 import { GeofencesModal } from "./geofences-modal";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
+import AddLocationAltOutlinedIcon from "@mui/icons-material/AddLocationAltOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 
 const Drawing = () => {
   const { replace } = useRouter();
@@ -113,7 +117,11 @@ const Drawing = () => {
 
         const query = `geofenceLocationGroupName=${geofenceLocationGroup}`;
         // console.log(`useEffect called with query`, query);
-        const geofences = await fetchGeofence(session?.token.idToken, orgId as string, query);
+        const geofences = await fetchGeofence(
+          session?.token.idToken,
+          orgId as string,
+          query
+        );
 
         if (geofences.length > 0) {
           // console.log(`dashboardmap:useEffect: geofences fetched: ` , geofences);
@@ -246,7 +254,7 @@ const Drawing = () => {
       setActiveShapeIndex(null); // Reset active shape
     }
     deleteGeofenceLocation(
-      session?.token.idToken, 
+      session?.token.idToken,
       session?.user.userId as string,
       orgId as string,
       selectedShape.tag,
@@ -267,22 +275,46 @@ const Drawing = () => {
         />
 
         <div className="relative shadow-md z-10 flex space-x-4">
-          <Button onClick={saveShapes}>Save</Button>
+          <Button
+            onClick={saveShapes}
+            icon={
+              <SaveOutlinedIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+              />
+            }
+          >
+            Save
+          </Button>
           <Button
             onClick={deleteSelectedShape}
             className="bg-red-500 hover:bg-red-400 active:bg-red-600"
+            icon={
+              <DeleteOutlinedIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+              />
+            }
           >
             Delete
           </Button>
           <Button
             onClick={() => setIsBulkCreateModalOpen(true)}
             className="bg-blue-500 hover:bg-blue-400 active:bg-blue-600"
+            icon={
+              <AddLocationAltOutlinedIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+              />
+            }
           >
             Bulk Create Geofences
           </Button>
           <Button
             onClick={() => setIsGeofenceListModalOpen(true)}
             className="bg-blue-500 hover:bg-blue-400 active:bg-blue-600"
+            icon={
+              <LocationOnOutlinedIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+              />
+            }
           >
             All Geofence List
           </Button>

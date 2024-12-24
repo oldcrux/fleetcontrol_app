@@ -22,9 +22,6 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { searchVehicleByNumber } from "@/app/lib/vehicle-utils";
 import { useSession } from "next-auth/react";
 import { Vehicle } from "@/app/lib/types";
-import Modal from "react-modal";
-import CloseIcon from "@mui/icons-material/Close";
-import TravelPath from "./travel-path";
 import { Grafana } from "./grafana";
 import { off_vehicle_color, running_vehicle_color, speeding_vehicle_color } from "../util/color_picker";
 

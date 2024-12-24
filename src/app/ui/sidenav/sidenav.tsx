@@ -32,7 +32,7 @@ export default function SideNav() {
     <div
       className={`flex ${
         isCollapsed ? "w-16" : "w-64"
-      } h-full flex-col px-3 py-4 transition-all duration-300 relative`}
+      } flex-col px-3 py-4 transition-all duration-300 relative`}
     >
       <Link
         className={`hidden sm:block mb-2 h-30 items-end justify-start rounded-md bg-white p-4 ${

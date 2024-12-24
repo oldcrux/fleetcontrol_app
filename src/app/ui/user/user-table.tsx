@@ -43,6 +43,8 @@ import {
 } from "@tanstack/react-query"; //Note: this is TanStack React Query V5
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
+import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import axios from "axios";
 import { Button } from "../button";
 import { User } from "@/app/lib/types";
@@ -51,7 +53,7 @@ import { useRouter } from "next/navigation";
 import { createUser, deleteUser, updateUser } from "@/app/lib/user-utils";
 import { fetchVendorNames } from "@/app/lib/org-utils";
 import { ChangePassword } from "./change_password";
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -92,7 +94,7 @@ const Users = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   useEffect(() => {
     const vendorNames = async () => {
       const vendorNames = await fetchVendorNames(session?.token.idToken, orgId);
@@ -630,14 +632,13 @@ const Users = () => {
               onClick={() => {
                 // console.log(`setting creating flag to true`);
                 // setCreating(true);
-                table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-                //or you can pass in a row object to set default values with the `createRow` helper function
-                // table.setCreatingRow(
-                //   createRow(table, {
-                //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-                //   }),
-                // );
+                table.setCreatingRow(true);
               }}
+              icon={
+                <PersonAddAltOutlinedIcon
+                  sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+                />
+              }
             >
               Create New User
             </Button>
@@ -647,10 +648,19 @@ const Users = () => {
                 Object.keys(rowSelection).length > 1
               }
               onClick={() => setIsModalOpen(true)}
+              icon={
+                <PasswordOutlinedIcon
+                  sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+                />
+              }
             >
               Change Password
             </Button>
-            <ChangePassword user={Object.keys(rowSelection)} show={isModalOpen} onClose={() => setIsModalOpen(false)}/>
+            <ChangePassword
+              user={Object.keys(rowSelection)}
+              show={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+            />
           </div>
         )}
       </>
@@ -820,8 +830,8 @@ const validateRequiredNumber = (value: any) => {
   return !isNaN(numValue) && numValue.toString().length === 10;
 };
 const passwordValidateRequired = (authType: string, value: string) => {
-  return authType==='db' && value.length < 8;
-}
+  return authType === "db" && value.length < 8;
+};
 
 function validateUser(user: User) {
   return {
@@ -836,7 +846,9 @@ function validateUser(user: User) {
     phoneNumber: !validateRequired(user.phoneNumber)
       ? "Phone Number is Required"
       : "",
-      password: passwordValidateRequired(user.authType, user.password) ? "Password must be at least 8 characters." : "",
+    password: passwordValidateRequired(user.authType, user.password)
+      ? "Password must be at least 8 characters."
+      : "",
     email: !validateRequired(user.email) ? "Email is Required" : "",
     address1: !validateRequired(user.address1) ? "Address1 is Required" : "",
     city: !validateRequired(user.city) ? "City is Required" : "",

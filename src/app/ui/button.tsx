@@ -2,24 +2,42 @@ import clsx from 'clsx';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
-export function Button({ children, className, disabled, ...rest }: ButtonProps) {
+export function Button({ children, icon, className, disabled, ...rest }: ButtonProps) {
   return (
     <button
       {...rest}
       disabled={disabled}
       className={clsx(
-        'flex h-10 items-center rounded-lg bg-blue-500 px-4 text:xl lg:text-sm font-medium text-white transition-colors',
+        'flex items-center rounded-lg bg-blue-500 text-white font-medium transition-colors',
         {
+          // Default styles
+          'h-10 px-4 text-xl': true, // Default large button size (large screens)
+          
+          // Responsive styles (for small screens)
+          'sm:h-8 sm:px-3 sm:text-sm': true, // Smaller button size and text on small screens
+
+          // Disable state
+          'cursor-not-allowed opacity-50': disabled, // Disabled styles
+          // Hover, focus, and active states
           'hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600':
-            !disabled, // Add hover/focus/active styles only if not disabled
-          'cursor-not-allowed opacity-50': disabled, // Add disabled styles
+            !disabled, // Apply hover/focus/active styles when not disabled
         },
-        className,
+        className
       )}
     >
-      {children}
+      {/* Conditionally render the text and icon */}
+      <span className="hidden sm:block">{children}</span> {/* Text is hidden on small screens */}
+      {/* Dynamically render the passed icon, with responsive size */}
+      {icon && (
+        <span className="text-xl sm:text-sm">
+          {icon}
+        </span>
+      )}
+      
     </button>
+
   );
 }

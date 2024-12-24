@@ -59,10 +59,15 @@ import { Vehicle } from "@/app/lib/types";
 import { useSession } from "next-auth/react";
 import { BulkCreateVehicle } from "./bulk-create-vehicle";
 import { Grafana } from "../dashboard/grafana";
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-// import { redirect } from "next/navigation";
-import { useRouter } from 'next/navigation'
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import RouteOutlinedIcon from "@mui/icons-material/RouteOutlined";
+import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import AddToPhotosOutlinedIcon from '@mui/icons-material/AddToPhotosOutlined';
+import { useRouter } from "next/navigation";
 import { fetchVendorNames } from "@/app/lib/org-utils";
+import TravelPath from "./travel-path";
+import MUIButton from "../mui_button";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 
@@ -93,12 +98,17 @@ const Vehicles = () => {
     "None",
   ]);
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
-  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId as string: '' as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
+  const vendorId = session?.user?.secondaryOrgId
+    ? (session?.user?.primaryOrgId as string)
+    : ("" as string);
   const userId = session?.user?.userId || "";
   const role = session?.user?.role;
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTravelPathModalOpen, setIsTravelPathModalOpen] = useState(false);
   const [isGrafanaModalOpen, setIsGrafanaModalOpen] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
   const [vendorNames, setVendorNames] = useState<string[]>(["None"]);
@@ -110,7 +120,7 @@ const Vehicles = () => {
     const updatedData = data.map((item: any) => ({
       ...item,
       createdBy: userId,
-      orgId: orgId
+      orgId: orgId,
     }));
     bulkCreateVehicle(session?.token.idToken, updatedData);
   };
@@ -118,7 +128,9 @@ const Vehicles = () => {
   useEffect(() => {
     const vendorNames = async () => {
       const vendorNames = await fetchVendorNames(session?.token.idToken, orgId);
-      const options = vendorNames.map((vendor: { organizationName: any }) => vendor.organizationName);
+      const options = vendorNames.map(
+        (vendor: { organizationName: any }) => vendor.organizationName
+      );
       // console.log(`geofenceGrps:`, geofenceGrps);
       setVendorNames([orgId, ...options]);
       // console.log(`geofence Groups ${JSON.stringify(geofenceGroupNames)}`, geofenceGroupNames);
@@ -128,7 +140,10 @@ const Vehicles = () => {
 
   useEffect(() => {
     const geofenceGroups = async () => {
-      const allGeofenceGroups = await fetchGeofenceGroups(session?.token.idToken, orgId);
+      const allGeofenceGroups = await fetchGeofenceGroups(
+        session?.token.idToken,
+        orgId
+      );
       // console.log(`useEffect called ${JSON.stringify(allGeofenceGroups)}`, allGeofenceGroups);
       const options = allGeofenceGroups.map(
         (location: { geofenceLocationGroupName: any }) =>
@@ -144,21 +159,25 @@ const Vehicles = () => {
 
   const getInsights = (event: React.MouseEvent) => {
     // console.info( rowSelection );
-    const selectedVehicles = Object.keys(rowSelection).filter((key) => rowSelection[key]);
+    const selectedVehicles = Object.keys(rowSelection).filter(
+      (key) => rowSelection[key]
+    );
     // console.info( selectedVehicles );
     setSelectedVehicles(selectedVehicles);
-    if(selectedVehicles){
+    if (selectedVehicles) {
       setIsGrafanaModalOpen(true);
     }
   };
-  
+
   const seeOnDashboard = (event: React.MouseEvent) => {
     // console.info( rowSelection );
-    const selectedVehicles = Object.keys(rowSelection).filter((key) => rowSelection[key]);
+    const selectedVehicles = Object.keys(rowSelection).filter(
+      (key) => rowSelection[key]
+    );
     // console.info( selectedVehicles );
     // setSelectedVehicles(selectedVehicles);
-    if(selectedVehicles){
-      const vehicles = selectedVehicles.join(',');
+    if (selectedVehicles) {
+      const vehicles = selectedVehicles.join(",");
       router.push(`/dashboard?query=${vehicles}`);
     }
   };
@@ -298,8 +317,7 @@ const Vehicles = () => {
         url.searchParams.set("vendorId", vendorId);
 
         // console.log(`making db call: ${JSON.stringify(url)}`);
-        const response = await axios.get(url.toString(), 
-        {
+        const response = await axios.get(url.toString(), {
           headers: {
             Authorization: `Bearer ${session?.token.idToken}`,
           },
@@ -403,7 +421,11 @@ const Vehicles = () => {
 
   //DELETE action
   const openDeleteConfirmModal = async (row: MRT_Row<Vehicle>) => {
-    if (window.confirm(`Are you sure you want to delete vehicle ${row.original.vehicleNumber} ?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete vehicle ${row.original.vehicleNumber} ?`
+      )
+    ) {
       await deleteVehicle(row.original.vehicleNumber);
     }
     refetch();
@@ -430,12 +452,11 @@ const Vehicles = () => {
     onEditingRowSave: handleSaveVehicle,
     createDisplayMode: "modal", //default ('row', and 'custom' are also available)
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
-    enableEditing: role !== 'view',
+    enableEditing: role !== "view",
     getRowId: (row) => row.vehicleNumber,
 
-    enableRowSelection:true,
+    enableRowSelection: true,
 
-    
     // muiTableBodyRowProps: ({ row }) => ({
     //   onClick: () =>
     //     setRowSelection((prev) => {
@@ -527,37 +548,94 @@ const Vehicles = () => {
 
     renderTopToolbarCustomActions: ({ table }) => (
       <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      {role !=='view' && <Button disabled={Object.keys(rowSelection).length !== 0}
-        onClick={() => {
-          // console.log(`setting creating flag to true`);
-          // setCreating(true);
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
-        }}
-      >
-        Create New Vehicle
-      </Button> }
-      {role !=='view' && <Button disabled={Object.keys(rowSelection).length !== 0} onClick={() => setIsModalOpen(true)}>
-       Bulk Create Vehicles</Button> }
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {role !== "view" && (
+            <Button
+              disabled={Object.keys(rowSelection).length !== 0}
+              onClick={() => {
+                // console.log(`setting creating flag to true`);
+                // setCreating(true);
+                table.setCreatingRow(true);
+              }}
+              icon={
+                <AddOutlinedIcon
+                  sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+                  />
+              }
+            >
+              Create New Vehicle
+            </Button>
+          )}
+          {role !== "view" && (
+            <Button
+              disabled={Object.keys(rowSelection).length !== 0}
+              onClick={() => setIsModalOpen(true)}
+              icon={
+                <AddToPhotosOutlinedIcon
+                  sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+                  />
+              }
+            >
+              Bulk Create Vehicles
+            </Button>
+          )}
 
-       <Button disabled={Object.keys(rowSelection).length === 0} onClick={seeOnDashboard}>
-       See on Dashboard
-       </Button>
+          <Button
+            disabled={Object.keys(rowSelection).length === 0}
+            onClick={seeOnDashboard}
+            icon={
+              <SpaceDashboardOutlinedIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+                />
+            }
+          >
+            See on Dashboard
+          </Button>
 
-       <Button disabled={Object.keys(rowSelection).length === 0} onClick={getInsights}>
-       Get Insights {">"} 
-       <OpenInNewIcon sx={{paddingLeft:1, fontSize:25, color: '#d5d7db'}}/>
-       </Button>
+          <Button
+            disabled={Object.keys(rowSelection).length === 0}
+            onClick={getInsights}
+            icon={
+              <OpenInNewIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+              />
+            }
+          >
+            Get Insights {">"}
+          </Button>
 
-       <BulkCreateVehicle show={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleBulkCreateVehicle} />
-       <Grafana openInNewTab={true} show={isGrafanaModalOpen} onClose={() => setIsGrafanaModalOpen(false)} vehicleNumbers={selectedVehicles} />
-       </div>
+          <Button
+            disabled={
+              Object.keys(rowSelection).length === 0 ||
+              Object.keys(rowSelection).length > 1
+            }
+            onClick={() => setIsTravelPathModalOpen(true)}
+            icon={
+              <RouteOutlinedIcon
+                sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
+              />
+            }
+          >
+            Today's travel Path
+          </Button>
+
+          <BulkCreateVehicle
+            show={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSave={handleBulkCreateVehicle}
+          />
+          <Grafana
+            openInNewTab={true}
+            show={isGrafanaModalOpen}
+            onClose={() => setIsGrafanaModalOpen(false)}
+            vehicleNumbers={selectedVehicles}
+          />
+          <TravelPath
+            vehicleNumber={selectedVehicles[0]}
+            show={isTravelPathModalOpen}
+            onClose={() => setIsTravelPathModalOpen(false)}
+          />
+        </div>
       </>
     ),
     // initialState: {
@@ -591,7 +669,7 @@ const Vehicles = () => {
       showProgressBars: isFetching,
       sorting,
       isSaving: isCreatingVehicle || isUpdatingVehicle || isDeletingVehicle,
-      rowSelection
+      rowSelection,
     },
     rowVirtualizerInstanceRef, //get access to the virtualizer instance
     rowVirtualizerOptions: { overscan: 4 },
@@ -605,12 +683,19 @@ function useCreateVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.userId || "";
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {
-      const status = await createVehicle(session?.token.idToken, orgId, userId, vehicle);
+      const status = await createVehicle(
+        session?.token.idToken,
+        orgId,
+        userId,
+        vehicle
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -643,11 +728,17 @@ function useUpdateVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
 
   return useMutation({
     mutationFn: async (vehicle: Vehicle) => {
-      const status = await updateVehicle(session?.token.idToken, orgId, vehicle);
+      const status = await updateVehicle(
+        session?.token.idToken,
+        orgId,
+        vehicle
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -669,13 +760,20 @@ function useDeleteVehicle() {
   const queryClient = useQueryClient();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId? session?.user?.secondaryOrgId : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : (session?.user?.primaryOrgId as string);
   const userId = session?.user?.id as string;
 
   return useMutation({
     mutationFn: async (vehicleNumber: string) => {
       //send api update request here
-      const status = await deleteVehicle(session?.token.idToken, userId, orgId, vehicleNumber);
+      const status = await deleteVehicle(
+        session?.token.idToken,
+        userId,
+        orgId,
+        vehicleNumber
+      );
       return Promise.resolve(status);
     },
     //client side optimistic update
@@ -688,7 +786,6 @@ function useDeleteVehicle() {
     },
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['vehicles'] }), //refetch vehicles after mutation, disabled for demo
   });
-  
 }
 
 const queryClient = new QueryClient();

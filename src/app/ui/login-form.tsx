@@ -72,6 +72,7 @@ export default function LoginForm() {
               variant="h5"
               color="primary"
               fontWeight="normal"
+              fontFamily={montserrat.className}
               className={montserrat.className}
             >
               OldCrux
