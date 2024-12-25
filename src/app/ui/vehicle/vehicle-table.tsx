@@ -182,6 +182,19 @@ const Vehicles = () => {
     }
   };
 
+  const seeTravelPath = (event: React.MouseEvent) => {
+    // console.info( rowSelection );
+    const selectedVehicles = Object.keys(rowSelection).filter(
+      (key) => rowSelection[key]
+    );
+    // console.info( selectedVehicles );
+    setSelectedVehicles(selectedVehicles);
+    if (selectedVehicles) {
+        setIsTravelPathModalOpen(true);
+    }
+  };
+
+
   const columns = useMemo<MRT_ColumnDef<Vehicle>[]>(
     () => [
       {
@@ -609,7 +622,7 @@ const Vehicles = () => {
               Object.keys(rowSelection).length === 0 ||
               Object.keys(rowSelection).length > 1
             }
-            onClick={() => setIsTravelPathModalOpen(true)}
+            onClick={seeTravelPath}
             icon={
               <RouteOutlinedIcon
                 sx={{ paddingLeft: 1, fontSize: 25, color: "#d5d7db" }}
