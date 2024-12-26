@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.0.38",
+    "@deck.gl/google-maps": "^9.0.38",
+    "@deck.gl/layers": "^9.0.38",
     "@emotion/cache": "^11.13.5",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
@@ -34,7 +37,7 @@
     "chartjs-plugin-annotation": "^3.1.0",
     "clsx": "^2.1.1",
     "codemirror": "^5.65.18",
-    "deck.gl": "^9.0.36",
+    "deck.gl": "^9.0.38",
     "exceljs": "^4.4.0",
     "fast-csv": "^5.0.1",
     "ioredis": "^5.4.1",

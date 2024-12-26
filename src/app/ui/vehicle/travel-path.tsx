@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  useJsApiLoader,
-  GoogleMap,
-  PolylineF,
-  MarkerF,
-} from "@react-google-maps/api";
-// import { Map, Marker, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import { fetchVehiclesTravelPath } from "@/app/lib/vehicle-utils";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { useSession } from "next-auth/react";
@@ -13,8 +6,10 @@ import Modal from "@mui/material/Modal";
 import { Box } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { off_vehicle_color } from "../util/color_picker";
-
-// const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
+import { AdvancedMarker, Map } from "@vis.gl/react-google-maps";
+import type { Feature, GeoJSON } from "geojson";
+import { GeoJsonLayer } from "@deck.gl/layers";
+import { DeckGlOverlay } from "../util/deckgl-overlay";
 
 interface LatLng {
   lat: number;
@@ -47,39 +42,79 @@ const TravelPath: React.FC<TravelPathProps> = ({
           return { lat: geofence.lat, lng: geofence.lng };
         });
         setPaths(paths);
-        // console.log(`paths==`, path);
+        // console.log(`paths==`, paths, vehicleNumber);
       }
     };
     fetchGeofences().catch(console.error);
   }, [vehicleNumber]);
 
-  // const { isLoaded } = useJsApiLoader({
-  //   googleMapsApiKey: API_KEY!,
-  // });
-
-  // if (!isLoaded) {
-  //   return <div>Loading...</div>;
-  // }
-
   const start = path[0];
   const end = path[path.length - 1];
   const center = start;
 
-  // const repeatedCoords = path.filter(
-  //   (coord: LatLng, index, self) =>
-  //     index !==
-  //     self.findIndex((t) => t.lat === coord.lat && t.lng === coord.lng)
-  // ); // Find repeated coordinates
+  function convertToMultiLineString(data: any): GeoJSON.FeatureCollection {
+    return {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "MultiLineString",
+            coordinates: [
+              data.map((point: any) => [point.lng, point.lat]), // Convert to [lng, lat]
+            ],
+          },
+          properties: {},
+        },
+      ],
+    };
+  }
 
-  // const getSvgIconPathData = () => {
-  //   const icon = <DirectionsCarIcon />;
-  //   const svgString = new XMLSerializer().serializeToString(
-  //     icon.props.children
-  //   );
-  //   return encodeURIComponent(svgString);
-  // };
-  // const carIconUrl = `data:image/svg+xml;utf8,${getSvgIconPathData}`;
-  
+  const geoJsonData = convertToMultiLineString(path);
+
+  function getDeckGlLayers(data: GeoJSON | null) {
+    if (!data) return [];
+
+    return [
+      new GeoJsonLayer({
+        id: "geojson-layer",
+        data,
+        stroked: false,
+        filled: true,
+        extruded: true,
+        pointType: "circle",
+        lineWidthScale: 20,
+        lineWidthMinPixels: 4,
+        // getFillColor: [160, 160, 180, 200],
+        // getLineColor: (f: Feature) => {
+        //   const hex = f?.properties?.color;
+        //   if (!hex) return '[0, 0, 0]';
+        //   return hex.match(/[0-9a-f]{2}/g)!.map((x: string) => parseInt(x, 16));
+        // },
+        getLineColor: [256, 70, 30, 180],
+        getPointRadius: 2,
+        getLineWidth: 0.001,
+        // getElevation: 30
+      }),
+    ];
+  }
+
+  const renderCustomPin = () => {
+    return (
+      <>
+        <div className="custom-pin">
+          <div className="image-container">
+            <DirectionsCarIcon
+              sx={{
+                color: off_vehicle_color,
+              }}
+            />
+          </div>
+        </div>
+      </>
+    );
+  };
+
   return (
     <Modal
       open={show}
@@ -117,30 +152,17 @@ const TravelPath: React.FC<TravelPathProps> = ({
             <CloseIcon />
           </button>
         </div>
-        <GoogleMap
-          mapContainerStyle={{ width: "100%", height: "95%" }}
-          center={center}
-          zoom={13}
-          options={{
-            gestureHandling: "greedy",
-            disableDefaultUI: true,
-            zoomControl: true,
-          }}
-        >
-          <PolylineF
-            path={path}
-            options={{
-              strokeColor: off_vehicle_color,
-              strokeOpacity: 0.8,
-              strokeWeight: 2,
-            }}
-          />
 
-           <MarkerF
-            key={vehicleNumber}
-            position={end}
-          />
-        </GoogleMap> 
+        <Map
+          defaultZoom={14}
+          defaultCenter={start}
+          gestureHandling={"greedy"}
+          zoomControl={true}
+          mapId="da37f3254c6a6d1c" // TODO this is demo mapId. need to change it.
+          // follow https://developers.google.com/maps/documentation/get-map-id
+        />
+        <DeckGlOverlay layers={getDeckGlLayers(geoJsonData)} />
+        <AdvancedMarker position={end}> {renderCustomPin()}</AdvancedMarker>
       </Box>
     </Modal>
   );
