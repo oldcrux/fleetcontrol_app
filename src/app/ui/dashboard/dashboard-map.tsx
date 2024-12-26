@@ -1,5 +1,5 @@
 "use client";
-import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { Map } from "@vis.gl/react-google-maps";
@@ -9,6 +9,9 @@ import { geofenceDrawingManager } from "../util/geofence-drawing-manager";
 import { VehicleMarkers } from "./live-vehicle-marker";
 import { useSession } from "next-auth/react";
 // import { Shape } from "@/app/lib/Types";
+import type { Feature, GeoJSON } from "geojson";
+import { GeoJsonLayer } from "@deck.gl/layers";
+import { DeckGlOverlay } from "../util/deckgl-overlay";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 const controller = new AbortController();
@@ -33,12 +36,16 @@ export default function DashboardMap({ query }: { query: string }) {
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [vehicles, setVehicles] = useState([]);
   // const drawingManager = dashboardDrawingManager()
-  const drawingManager = geofenceDrawingManager();
+  // const drawingManager = geofenceDrawingManager();
   const [searchParam, setSearchParam] = useState<string>();
 
   const { data: session } = useSession();
-  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId : session?.user?.primaryOrgId;
-  const vendorId = session?.user?.secondaryOrgId ? session?.user?.primaryOrgId : '';
+  const orgId = session?.user?.secondaryOrgId
+    ? session?.user?.secondaryOrgId
+    : session?.user?.primaryOrgId;
+  const vendorId = session?.user?.secondaryOrgId
+    ? session?.user?.primaryOrgId
+    : "";
   const orgLatitude = Number(session?.user?.orgLatitude);
   const orgLongitude = Number(session?.user?.orgLongitude);
 
@@ -78,7 +85,7 @@ export default function DashboardMap({ query }: { query: string }) {
     const fetchGeofences = async () => {
       // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
       // console.log(`encodedViewport from session: ${encodedViewport}`);
-      const encodedViewport = '';
+      const encodedViewport = "";
       const params = new URLSearchParams(searchParams);
       const searchParam = params.get("query");
       // console.log(`request param`, searchParam);
@@ -87,7 +94,7 @@ export default function DashboardMap({ query }: { query: string }) {
         setSearchParam(searchParam);
 
         const geofences = await searchGeofence(
-          session?.token.idToken, 
+          session?.token.idToken,
           orgId as string,
           encodedViewport,
           searchParam as string
@@ -114,6 +121,9 @@ export default function DashboardMap({ query }: { query: string }) {
       }
     };
     fetchGeofences().catch(console.error);
+    // console.log("Reloading Geofences");
+    // const interval = setInterval(fetchGeofences, 5000);
+    // return () => clearInterval(interval);
   }, []);
   // }, [viewport]);
 
@@ -124,7 +134,7 @@ export default function DashboardMap({ query }: { query: string }) {
         // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
         // console.log(`bound values: ${encodedViewport}`);
         const params = new URLSearchParams(searchParams);
-        
+
         // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
         let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&vendorId=${vendorId}`;
         const searchParam = params.get("query");
@@ -135,31 +145,31 @@ export default function DashboardMap({ query }: { query: string }) {
         }
         // console.log(`request path`, path);
         // eventSource = new EventSource(`${nodeServerUrl}${path}`); // Connect to SSE endpoint
-        eventSource = fetchEventSource(`${nodeServerUrl}${path}`, 
-          {
-            headers: {
-              Authorization: `Bearer ${session?.token.idToken}`,
-            },
-            // signal,
-            onmessage : (event: any) => {
-              const eventData = JSON.parse(event.data);
-              // console.log(`all vehicles fetched=>`, event.data);
-              if (eventData.length > 0) {
-                const vehicle = eventData.map((event: any) => ({
-                  ignition: event.ignition,
-                  key: event.vehicleNumber,
-                  speed: event.speed,
-                  location: {
-                    lat: event.latitude,
-                    lng: event.longitude,
-                  },
-                }));
-                // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
-                setVehicles(vehicle);
-              } else {
-                setVehicles([]);
-              }
-            }});
+        eventSource = fetchEventSource(`${nodeServerUrl}${path}`, {
+          headers: {
+            Authorization: `Bearer ${session?.token.idToken}`,
+          },
+          // signal,
+          onmessage: (event: any) => {
+            const eventData = JSON.parse(event.data);
+            // console.log(`all vehicles fetched=>`, event.data);
+            if (eventData.length > 0) {
+              const vehicle = eventData.map((event: any) => ({
+                ignition: event.ignition,
+                key: event.vehicleNumber,
+                speed: event.speed,
+                location: {
+                  lat: event.latitude,
+                  lng: event.longitude,
+                },
+              }));
+              // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+              setVehicles(vehicle);
+            } else {
+              setVehicles([]);
+            }
+          },
+        });
         // eventSource.onmessage = (event: any) => {
         //   const eventData = JSON.parse(event.data);
         //   // console.log(`all vehicles fetched=>`, event.data);
@@ -187,45 +197,62 @@ export default function DashboardMap({ query }: { query: string }) {
 
     //TODO this is not working. The connection is not getting closed when navigating away from dashboard
     return () => {
-        controller.abort();
-        console.log("map SSE connection closed");
+      controller.abort();
+      console.log("map SSE connection closed");
     };
   }, []);
   // }, [viewport, searchParam]);
 
-  useEffect(() => {
-    if (!drawingManager) return;
-    drawingManager.setOptions({ drawingControl: false, drawingMode: null });
-    // console.log(`use effect - set drawing manager`);
+  // useEffect(() => {
+  //   if (!drawingManager) return;
+  //   drawingManager.setOptions({ drawingControl: false, drawingMode: null });
+  // }, [drawingManager]);
 
-    // Iterate over the shapes and render the appropriate overlays
-    shapes.forEach((shape) => {
-      let shapeOverlay;
-      if (shape.type === "polygon" && shape.path) {
-        shapeOverlay = new google.maps.Polygon({
-          paths: shape.path,
-          map: drawingManager.getMap(),
-          // options: drawingManager.get("polygonOptions"),
-          editable: false,
-          draggable: false,
-        });
-      } else if (shape.type === "circle" && shape.center) {
-        new google.maps.Circle({
-          center: shape.center,
-          radius: shape.radius,
-          map: drawingManager.getMap(),
-          // options: drawingManager.get("circleOptions"),
-          strokeColor: "#ef4444",
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: "#fca5a5",
-          fillOpacity: 0.35,
-          editable: false,
-          draggable: false,
-        });
-      }
-    });
-  }, [drawingManager, shapes]);
+  //TODO - will change the geofence save logic to center [lng, lat] from {"lat":20.3298,"lng":85.8137}
+  function convertToGeoJSON(shapes: any): GeoJSON.FeatureCollection {
+    return {
+      type: "FeatureCollection",
+      features: shapes.map((item: any) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [item.center.lng, item.center.lat], // Convert lat/lng to [lng, lat]
+        },
+        properties: {
+          radius: item.radius,
+          color: item.color, // Include color as a property
+        },
+      })),
+    };
+  }
+  const geoJsonData = convertToGeoJSON(shapes);
+  
+  function getDeckGlLayers(data: GeoJSON | null) {
+    if (!data) return [];
+    return [
+      new GeoJsonLayer({
+        id: "geojson-layer",
+        data: data,
+        stroked: false,
+        filled: true,
+        extruded: true,
+        pointType: "circle",
+        // lineWidthScale: 20,
+        // lineWidthMinPixels: 4,
+        getFillColor: [255, 70, 30, 180],
+        // getLineColor: (f: Feature) => {
+        //   const hex = f?.properties?.color;
+        //   if (!hex) return [0, 0, 0];
+        //   return hex.match(/[0-9a-f]{2}/g)!.map((x: string) => parseInt(x, 16));
+        // },
+        getPointRadius: 30,
+        // getRadius: (f: any) => f.properties.radius,
+        // getLineWidth: 3,
+        // getLineColor: [70, 70, 30, 180],
+        // getElevation: 100,
+      }),
+    ];
+  }
 
   return (
     <>
@@ -240,7 +267,7 @@ export default function DashboardMap({ query }: { query: string }) {
           mapId="da37f3254c6a6d1c" // TODO this is demo mapId. need to change it.
           // follow https://developers.google.com/maps/documentation/get-map-id
         />
-
+        <DeckGlOverlay layers={getDeckGlLayers(geoJsonData)} />
         <VehicleMarkers vehicles={vehicles} />
       </div>
     </>
