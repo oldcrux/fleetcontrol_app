@@ -64,6 +64,12 @@ export async function fetchGeofence(idToken: string, orgId: string, query: strin
 }
 
 export async function deleteGeofenceLocation(idToken: string, userId: string, orgId: string, locationTag: string, id: string) {
+
+  if(!orgId || !id || !locationTag){
+    console.log(`orgId or geofence location tag or Id is missing.`)
+    return;
+  }
+
   const payload = {
     userId: userId,
     orgId: orgId,
@@ -81,6 +87,11 @@ export async function deleteGeofenceLocation(idToken: string, userId: string, or
 }
 
 export async function deleteGeofenceLocationById(idToken: string, orgId: string, id: string) {
+
+  if(!orgId || !id){
+    console.log(`orgId or geofence location Id is missing.`)
+    return;
+  }
   const payload = {
     orgId: orgId,
     id: id

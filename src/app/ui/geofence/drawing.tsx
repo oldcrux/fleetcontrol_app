@@ -253,6 +253,10 @@ const Drawing = () => {
       setSelectedShape(null);
       setActiveShapeIndex(null); // Reset active shape
     }
+    else{
+      console.log(`Cannot delete.  No shape selected`);
+      return;
+    }
     deleteGeofenceLocation(
       session?.token.idToken,
       session?.user.userId as string,
