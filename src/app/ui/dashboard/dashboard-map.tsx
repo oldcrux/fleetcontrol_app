@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import type { Feature, GeoJSON } from "geojson";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { DeckGlOverlay } from "../util/deckgl-overlay";
+import { geofence_touched_color, geofence_untouched_color } from "../util/color_picker";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 const controller = new AbortController();
@@ -90,7 +91,7 @@ export default function DashboardMap({ query }: { query: string }) {
       const searchParam = params.get("query");
       // console.log(`request param`, searchParam);
       if (searchParam) {
-        // console.log(searchParam);
+        // console.log(`request param`, searchParam);
         setSearchParam(searchParam);
 
         const geofences = await searchGeofence(
@@ -99,7 +100,7 @@ export default function DashboardMap({ query }: { query: string }) {
           encodedViewport,
           searchParam as string
         );
-        // console.log(`dashboardmap:useEffect: geofences fetched: ${JSON.stringify(geofences)}`);
+        // console.log(`dashboardmap:useEffect: geofences fetched:`);
         if (geofences.length > 0) {
           const newShapes = geofences.map((geofence: any) => {
             const overlay = {
@@ -113,6 +114,7 @@ export default function DashboardMap({ query }: { query: string }) {
                   ? JSON.parse(geofence.center)
                   : null,
               radius: geofence.radius,
+              touched: geofence.touched
             };
             return overlay;
           });
@@ -121,9 +123,8 @@ export default function DashboardMap({ query }: { query: string }) {
       }
     };
     fetchGeofences().catch(console.error);
-    // console.log("Reloading Geofences");
-    // const interval = setInterval(fetchGeofences, 5000);
-    // return () => clearInterval(interval);
+    const interval = setInterval(fetchGeofences, 5000);
+    return () => clearInterval(interval);
   }, []);
   // }, [viewport]);
 
@@ -212,21 +213,21 @@ export default function DashboardMap({ query }: { query: string }) {
   function convertToGeoJSON(shapes: any): GeoJSON.FeatureCollection {
     return {
       type: "FeatureCollection",
-      features: shapes.map((item: any) => ({
+      features: shapes.map((geofence: any) => ({
         type: "Feature",
         geometry: {
           type: "Point",
-          coordinates: [item.center.lng, item.center.lat], // Convert lat/lng to [lng, lat]
+          coordinates: [geofence.center.lng, geofence.center.lat], // Convert lat/lng to [lng, lat]
         },
         properties: {
-          radius: item.radius,
-          color: item.color, // Include color as a property
+          radius: geofence.radius,
+          color: geofence.touched===false ? geofence_untouched_color : geofence_touched_color, //TODO add feature flag here.
         },
       })),
     };
   }
   const geoJsonData = convertToGeoJSON(shapes);
-  
+
   function getDeckGlLayers(data: GeoJSON | null) {
     if (!data) return [];
     return [
@@ -239,7 +240,8 @@ export default function DashboardMap({ query }: { query: string }) {
         pointType: "circle",
         // lineWidthScale: 20,
         // lineWidthMinPixels: 4,
-        getFillColor: [255, 70, 30, 180],
+        // getFillColor: [255, 70, 30, 180],
+        getFillColor: (f: any) => f.properties.color,
         // getLineColor: (f: Feature) => {
         //   const hex = f?.properties?.color;
         //   if (!hex) return [0, 0, 0];
