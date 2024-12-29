@@ -23,6 +23,14 @@ export default async function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={`${roboto.className}  antialiased`}>
+      <div
+          className={`${montserrat.className} fixed top-2 left-2 p-1 text-xs text-gray-300 flex justify-center sm:justify-end`}
+        >
+          <a href="https://oldcrux.com/" className="hover:text-blue-500">
+          {'<'} oldcrux.com
+          </a>
+        </div>
+
         <SessionProvider session={session}>
           <GoogleMapProvider>{children}</GoogleMapProvider>
         </SessionProvider>
