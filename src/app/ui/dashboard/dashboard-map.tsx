@@ -123,7 +123,7 @@ export default function DashboardMap({ query }: { query: string }) {
       }
     };
     fetchGeofences().catch(console.error);
-    const interval = setInterval(fetchGeofences, 5000);
+    const interval = setInterval(fetchGeofences, 10000);
     return () => clearInterval(interval);
   }, []);
   // }, [viewport]);

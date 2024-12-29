@@ -7,3 +7,4 @@ export const speeding_vehicle_color='#f25050';
 
 export const geofence_touched_color=[88, 237, 95, 180]; //green
 export const geofence_untouched_color=[255, 70, 30, 180]; //red
+export const travel_path_color=[84, 88, 94, 180] // grey
