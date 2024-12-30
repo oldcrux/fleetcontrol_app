@@ -12,7 +12,11 @@ import { useSession } from "next-auth/react";
 import type { Feature, GeoJSON } from "geojson";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { DeckGlOverlay } from "../util/deckgl-overlay";
-import { geofence_touched_color, geofence_untouched_color } from "../util/color_picker";
+import {
+  geofence_touched_color,
+  geofence_untouched_color,
+} from "../util/color_picker";
+import axios from "axios";
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 const controller = new AbortController();
@@ -114,7 +118,7 @@ export default function DashboardMap({ query }: { query: string }) {
                   ? JSON.parse(geofence.center)
                   : null,
               radius: geofence.radius,
-              touched: geofence.touched
+              touched: geofence.touched,
             };
             return overlay;
           });
@@ -130,77 +134,86 @@ export default function DashboardMap({ query }: { query: string }) {
 
   useEffect(() => {
     let eventSource: any;
+    const params = new URLSearchParams(searchParams);
+
+    // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
+    let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&vendorId=${vendorId}`;
+    const searchParam = params.get("query");
+    // console.log(`request param received`, searchParam);
+    if (searchParam) {
+      setSearchParam(searchParam);
+      path = `${path}&query=${searchParam}`;
+    }
+
     const fetchRunningVehicles = async () => {
       try {
         // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
         // console.log(`bound values: ${encodedViewport}`);
-        const params = new URLSearchParams(searchParams);
 
-        // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
-        let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&vendorId=${vendorId}`;
-        const searchParam = params.get("query");
-        // console.log(`request param received`, searchParam);
-        if (searchParam) {
-          setSearchParam(searchParam);
-          path = `${path}&query=${searchParam}`;
-        }
         // console.log(`request path`, path);
         // eventSource = new EventSource(`${nodeServerUrl}${path}`); // Connect to SSE endpoint
-        eventSource = fetchEventSource(`${nodeServerUrl}${path}`, {
+        // eventSource = fetchEventSource(`${nodeServerUrl}${path}`, {
+        //   headers: {
+        //     Authorization: `Bearer ${session?.token.idToken}`,
+        //   },
+        //   // signal,
+        //   onmessage: (event: any) => {
+        //     const eventData = JSON.parse(event.data);
+        //     // console.log(`all vehicles fetched=>`, event.data);
+        //     if (eventData.length > 0) {
+        //       const vehicle = eventData.map((event: any) => ({
+        //         ignition: event.ignition,
+        //         key: event.vehicleNumber,
+        //         speed: event.speed,
+        //         location: {
+        //           lat: event.latitude,
+        //           lng: event.longitude,
+        //         },
+        //       }));
+        //       // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+        //       setVehicles(vehicle);
+        //     } else {
+        //       setVehicles([]);
+        //     }
+        //   },
+        // });
+        const url = new URL(path, nodeServerUrl);
+        const response = await axios.get(`${url}`, {
           headers: {
             Authorization: `Bearer ${session?.token.idToken}`,
           },
-          // signal,
-          onmessage: (event: any) => {
-            const eventData = JSON.parse(event.data);
-            // console.log(`all vehicles fetched=>`, event.data);
-            if (eventData.length > 0) {
-              const vehicle = eventData.map((event: any) => ({
-                ignition: event.ignition,
-                key: event.vehicleNumber,
-                speed: event.speed,
-                location: {
-                  lat: event.latitude,
-                  lng: event.longitude,
-                },
-              }));
-              // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
-              setVehicles(vehicle);
-            } else {
-              setVehicles([]);
-            }
-          },
+          // withCredentials: true,
         });
-        // eventSource.onmessage = (event: any) => {
-        //   const eventData = JSON.parse(event.data);
-        //   // console.log(`all vehicles fetched=>`, event.data);
-        //   if (eventData.length > 0) {
-        //     const vehicle = eventData.map((event: any) => ({
-        //       ignition: event.ignition,
-        //       key: event.vehicleNumber,
-        //       speed: event.speed,
-        //       location: {
-        //         lat: event.latitude,
-        //         lng: event.longitude,
-        //       },
-        //     }));
-        //     // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
-        //     setVehicles(vehicle);
-        //   } else {
-        //     setVehicles([]);
-        //   }
-        // };
+
+        const eventData = await response.data;
+        if (eventData.length > 0) {
+          const vehicle = eventData.map((event: any) => ({
+            ignition: event.ignition,
+            key: event.vehicleNumber,
+            speed: event.speed,
+            location: {
+              lat: event.latitude,
+              lng: event.longitude,
+            },
+          }));
+          // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+          setVehicles(vehicle);
+        } else {
+          setVehicles([]);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     fetchRunningVehicles();
+    const interval = setInterval(fetchRunningVehicles, 10000);
+    return () => clearInterval(interval);
 
     //TODO this is not working. The connection is not getting closed when navigating away from dashboard
-    return () => {
-      controller.abort();
-      console.log("map SSE connection closed");
-    };
+    // return () => {
+    //   controller.abort();
+    //   console.log("map SSE connection closed");
+    // };
   }, []);
   // }, [viewport, searchParam]);
 
@@ -221,7 +234,10 @@ export default function DashboardMap({ query }: { query: string }) {
         },
         properties: {
           radius: geofence.radius,
-          color: geofence.touched===false ? geofence_untouched_color : geofence_touched_color, //TODO add feature flag here.
+          color:
+            geofence.touched === false
+              ? geofence_untouched_color
+              : geofence_touched_color, //TODO add feature flag here.
         },
       })),
     };
