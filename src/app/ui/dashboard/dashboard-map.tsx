@@ -1,5 +1,5 @@
 "use client";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
+// import { fetchEventSource } from "@microsoft/fetch-event-source";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { Map } from "@vis.gl/react-google-maps";
@@ -139,44 +139,15 @@ export default function DashboardMap({ query }: { query: string }) {
     // let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&encodedViewport=${encodedViewport}`;
     let path = `/node/api/vehicleTelemetryData/fetchAllVehiclesSSE?orgId=${orgId}&vendorId=${vendorId}`;
     const searchParam = params.get("query");
-    // console.log(`request param received`, searchParam);
+    
     if (searchParam) {
       setSearchParam(searchParam);
       path = `${path}&query=${searchParam}`;
     }
 
     const fetchRunningVehicles = async () => {
+      console.log(`request param received`, path);
       try {
-        // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
-        // console.log(`bound values: ${encodedViewport}`);
-
-        // console.log(`request path`, path);
-        // eventSource = new EventSource(`${nodeServerUrl}${path}`); // Connect to SSE endpoint
-        // eventSource = fetchEventSource(`${nodeServerUrl}${path}`, {
-        //   headers: {
-        //     Authorization: `Bearer ${session?.token.idToken}`,
-        //   },
-        //   // signal,
-        //   onmessage: (event: any) => {
-        //     const eventData = JSON.parse(event.data);
-        //     // console.log(`all vehicles fetched=>`, event.data);
-        //     if (eventData.length > 0) {
-        //       const vehicle = eventData.map((event: any) => ({
-        //         ignition: event.ignition,
-        //         key: event.vehicleNumber,
-        //         speed: event.speed,
-        //         location: {
-        //           lat: event.latitude,
-        //           lng: event.longitude,
-        //         },
-        //       }));
-        //       // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
-        //       setVehicles(vehicle);
-        //     } else {
-        //       setVehicles([]);
-        //     }
-        //   },
-        // });
         const url = new URL(path, nodeServerUrl);
         const response = await axios.get(`${url}`, {
           headers: {
@@ -196,7 +167,7 @@ export default function DashboardMap({ query }: { query: string }) {
               lng: event.longitude,
             },
           }));
-          // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+          console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
           setVehicles(vehicle);
         } else {
           setVehicles([]);
