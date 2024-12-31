@@ -1,5 +1,5 @@
 "use client";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
+// import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { Pie, Bar } from "react-chartjs-2";
 import { useState, useEffect } from "react";
 import Modal from "react-modal";
