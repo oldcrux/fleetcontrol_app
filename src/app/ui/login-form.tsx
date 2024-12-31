@@ -53,6 +53,14 @@ export default function LoginForm() {
 
   return (
     <>
+    <div
+          className={`${montserrat.className} fixed top-2 left-2 p-1 text-xs text-gray-300 flex justify-center sm:justify-end`}
+        >
+          <a href="https://oldcrux.com/" className="hover:text-blue-500">
+          {'<'} oldcrux.com
+          </a>
+        </div>
+        
       <form onSubmit={handleSubmit}>
         <Box
           sx={{
