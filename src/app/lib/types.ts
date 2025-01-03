@@ -5,6 +5,7 @@ declare module 'next-auth' {
   interface User {
     // Id?: string;
     userId?:string;
+    isActive?:boolean;
     role?:string;
     primaryOrgId?: string;
     secondaryOrgId?: string;
