@@ -1,3 +1,4 @@
+
 import NextAuth, { User } from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
@@ -6,8 +7,6 @@ import { z } from 'zod';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
-import { AuthError } from 'next-auth';
-// import { logDebug, logError, logInfo } from './app/lib/logger';
 
 const nodeServerUrl = process.env.NEXT_PUBLIC_NODE_SERVER_URL;
 const maxage =  Number(process.env.AUTH_MAX_AGE) || 14400;
@@ -16,25 +15,16 @@ const updateAge = Number(process.env.AUTH_UPDATE_AGE) || 36000;
 async function getUser(userId: string) {
   try {
     // console.log(`fetching User with Id:`, userId);
-    const response = await axios.get(`${nodeServerUrl}/node/api/user/search?userId=${userId}`);
+    const response = await axios.get(`${nodeServerUrl}/node/api/user/search/active?userId=${userId}`);
     const user = response.data;
+    if(user.isActive==false){
+      throw new Error('User is not active.');
+    }
     // console.log(`User Fetched.`, user);
     return user;
   } catch (error) {
-    // logError('auth.ts: getUser: Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
-  }
-}
-
-async function  getOrganization(orgId:string) {
-  try {
-    const response = await axios.get(`${nodeServerUrl}/node/api/organization/search?orgId=${orgId}`);
-    const org = response.data;
-    // console.log(`org fetched:`, org);
-    return org[0];
-  } catch (error) {
-    // logError('auth.ts: getOrganization: Failed to fetch organization:', error);
-    throw new Error('Failed to fetch getOrganization.');
+     console.log('Failed to fetch user.', error);
+    throw error;
   }
 }
 
@@ -67,12 +57,18 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
       if(session.token.idToken){  // idToken is fetched from google. Now load the user details
         // console.log(`auth.ts sesssion: is this being called *****`);
         const user = await getUser(session.user.email);
+        
+        const newIdToken = createIdToken(user, session.token.idToken);
+        session.token.idToken = newIdToken;
+
         session.user.id = user.id as string;
         session.user.userId = user.userId as string;
         session.user.role = user.role as string;
         session.user.primaryOrgId= user.primaryOrgId as string;
         session.user.secondaryOrgId= user.secondaryOrgId as string;
-        // console.log(`auth.ts sesssion: is this being called session here *****`, session.user);
+        session.user.orgLatitude=user.latitude;
+        session.user.orgLongitude=user.longitude;
+        // console.log(`auth.ts sesssion: is this being called session here *****`, user);
       }
       else{ // DB based login
         session.user.id = token.id as string;
@@ -85,7 +81,7 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
         const idToken = createIdToken(session.user)
         session.token.idToken=idToken;
       }
-      // console.log(`auth.ts: User fetched`, user);
+      // console.log(`auth.ts: User fetched`, session.user);
      
       // session.user.orgLatitude = token.user.orgLatitude as string;
       // session.user.orgLongitude = token.user.orgLongitude as string;
@@ -116,19 +112,13 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
           user = await getUser(userId);
           if (!user)
             return null;
-          // console.log(`auth.ts: user fetched:`, user);
-          if (!user.isActive) {
-            // throw new AuthError('User is not active');
-            return null;
-          }
-          
+          // if (!user.isActive) {
+          //   return null;
+          // }
           const dbPassword = user.password;
         
           const passwordsMatch = await bcrypt.compare(password, dbPassword);
           if (passwordsMatch){
-            // const org = await getOrganization(user.orgId);
-            // user.orgLatitude = org.latitude;
-            // user.orgLongitude = org.longitude;
             return user;
           }
         }
@@ -139,15 +129,16 @@ export const {handlers, auth, signIn, signOut } = NextAuth({
 });
 
 
- function createIdToken(user: User){
-  const payload = {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    iss: "oldcruxdb"
-  };
-  const idToken = jwt.sign(payload, process.env.AUTH_SECRET? process.env.AUTH_SECRET : '', {
-    expiresIn: maxage, // Token validity duration
-  });
-  return idToken;
+ function createIdToken(user: User, existingIdToken?: any){
+    const payload = {
+      id: user.id,
+      email: user.email,
+      user: user,
+      iss: "db",
+      typ: 'Bearer',
+    };
+    const idToken = jwt.sign(payload, process.env.AUTH_SECRET? process.env.AUTH_SECRET : '', {
+      expiresIn: maxage,
+    });
+    return idToken;
 }
