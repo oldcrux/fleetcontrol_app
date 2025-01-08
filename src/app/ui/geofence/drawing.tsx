@@ -268,7 +268,7 @@ const Drawing = () => {
 
   return (
     <>
-      <div className="p-2 flex items-center justify-between space-x-4">
+      <div className="p-2 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-x-4">
         <input
           type="text"
           value={geofenceLocationGroup}

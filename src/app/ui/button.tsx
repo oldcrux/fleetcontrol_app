@@ -29,14 +29,14 @@ export function Button({ children, icon, className, disabled, ...rest }: ButtonP
       )}
     >
       {/* Conditionally render the text and icon */}
-      <span className="hidden sm:block">{children}</span> {/* Text is hidden on small screens */}
+      
       {/* Dynamically render the passed icon, with responsive size */}
       {icon && (
-        <span className="text-xl sm:text-sm">
+        <span className="mr-1">
           {icon}
         </span>
       )}
-      
+      <span className="hidden sm:block">{children}</span> {/* Text is hidden on small screens */}
     </button>
 
   );

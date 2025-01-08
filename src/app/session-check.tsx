@@ -32,8 +32,8 @@ const checkTokenForExpiryAndLogout = () => {
         }
       }
     };
-
-    console.log("Starting token validity check interval");
+    tokenCheck();
+    console.log("Checking Token");
     const interval = setInterval(tokenCheck, 60000);
 
     return () => clearInterval(interval);

@@ -713,16 +713,18 @@ function useCreateUser() {
   const orgId = session?.user?.secondaryOrgId
     ? session?.user?.secondaryOrgId
     : (session?.user?.primaryOrgId as string);
-  const userId = session?.user?.userId || "";
+  const loggedinUserId = session?.user?.userId || "";
 
   return useMutation({
     mutationFn: async (user: User) => {
-      const password = await bcrypt.hash(user.password, 10);
-      user.password = password;
+      if (user.password) {
+        const password = await bcrypt.hash(user.password, 10);
+        user.password = password;
+      }
       const status = await createUser(
         session?.token.idToken,
         orgId,
-        userId,
+        loggedinUserId,
         user
       );
       return Promise.resolve(status);
@@ -846,7 +848,7 @@ function validateUser(user: User) {
     phoneNumber: !validateRequired(user.phoneNumber)
       ? "Phone Number is Required"
       : "",
-    password: passwordValidateRequired(user.authType, user.password)
+    password: passwordValidateRequired(user.authType, user.password!)
       ? "Password must be at least 8 characters."
       : "",
     email: !validateRequired(user.email) ? "Email is Required" : "",

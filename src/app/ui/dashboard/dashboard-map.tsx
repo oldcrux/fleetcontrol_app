@@ -54,38 +54,6 @@ export default function DashboardMap({ query }: { query: string }) {
   const orgLatitude = Number(session?.user?.orgLatitude);
   const orgLongitude = Number(session?.user?.orgLongitude);
 
-  // const [viewport, setViewport] = useState<Viewport>({
-  //   north: null,
-  //   south: null,
-  //   east: null,
-  //   west: null,
-  // });
-
-  // Handle bounds change and debounce the loading function to avoid excessive calls
-  // const handleBoundsChanged = useCallback(() => {
-  //   if (!drawingManager?.getMap()) return;
-  //   const bounds = drawingManager?.getMap()?.getBounds();
-
-  //   const north = bounds?.getNorthEast().lat() ?? null;
-  //   const south = bounds?.getSouthWest().lat() ?? null;
-  //   const east = bounds?.getNorthEast().lng() ?? null;
-  //   const west = bounds?.getSouthWest().lng() ?? null;
-
-  //   // console.log(`bound values: ${east}, ${west}, ${north}, ${south}`);
-  //   setViewport({ north, south, east, west });
-  // }, [drawingManager?.getMap()]);
-
-  // useEffect(() => {
-  //   const map = drawingManager?.getMap();
-  //   if (!map) return;
-
-  //   // Add the event listener to the map for bounds_changed
-  //   const listener = map.addListener("bounds_changed", handleBoundsChanged);
-
-  //   // Clean up the listener on component unmount
-  //   return () => google.maps.event.removeListener(listener);
-  // }, [drawingManager, handleBoundsChanged]);
-
   useEffect(() => {
     const fetchGeofences = async () => {
       // const encodedViewport = encodeURIComponent(JSON.stringify(viewport));
@@ -146,7 +114,6 @@ export default function DashboardMap({ query }: { query: string }) {
     }
 
     const fetchRunningVehicles = async () => {
-      console.log(`request param received`, path);
       try {
         const url = new URL(path, nodeServerUrl);
         const response = await axios.get(`${url}`, {
@@ -167,7 +134,7 @@ export default function DashboardMap({ query }: { query: string }) {
               lng: event.longitude,
             },
           }));
-          console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
+          // console.log(`dashboardmap:fetchRunningVehicles: vehicle current location => ${JSON.stringify(vehicle)}`);
           setVehicles(vehicle);
         } else {
           setVehicles([]);
@@ -179,19 +146,8 @@ export default function DashboardMap({ query }: { query: string }) {
     fetchRunningVehicles();
     const interval = setInterval(fetchRunningVehicles, 10000);
     return () => clearInterval(interval);
-
-    //TODO this is not working. The connection is not getting closed when navigating away from dashboard
-    // return () => {
-    //   controller.abort();
-    //   console.log("map SSE connection closed");
-    // };
   }, []);
   // }, [viewport, searchParam]);
-
-  // useEffect(() => {
-  //   if (!drawingManager) return;
-  //   drawingManager.setOptions({ drawingControl: false, drawingMode: null });
-  // }, [drawingManager]);
 
   //TODO - will change the geofence save logic to center [lng, lat] from {"lat":20.3298,"lng":85.8137}
   function convertToGeoJSON(shapes: any): GeoJSON.FeatureCollection {
@@ -248,7 +204,7 @@ export default function DashboardMap({ query }: { query: string }) {
       <div className="h-screen lg:p-2">
         <Map
           defaultZoom={14}
-          defaultCenter={{ lat: 20.2827, lng: 85.8427 }}
+          defaultCenter={{ lat: orgLatitude, lng: orgLongitude }}
           // defaultCenter={{ lat: orgLatitude, lng: orgLongitude }}
           gestureHandling={"greedy"}
           zoomControl={true}
