@@ -125,6 +125,7 @@ const Geofences: React.FC<LocationProps> = ({ onClose }) => {
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
+    isRefetching
   ]);
 
   const columns = useMemo<MRT_ColumnDef<Geofence>[]>(
