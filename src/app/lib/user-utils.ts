@@ -11,7 +11,7 @@ export async function createUser(idToken: string, orgId: string, userId: string,
   // user.primaryOrgId = orgId;
   user.createdBy = userId
 
-  if (user.authType = 'others') {
+  if (user.authType === 'others') {
     user.password = undefined;
   }
   const response = await axios.post(`${nodeServerUrl}/node/api/user/create`, user, {
