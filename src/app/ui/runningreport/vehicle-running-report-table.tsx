@@ -170,7 +170,10 @@ const columns: MRT_ColumnDef<VehicleTelemetryReport>[] = [
       return <span>{localTime}</span>;
     },
   },
-
+  {
+    header: 'Idle Duration(Mins)',
+    accessorKey: 'idleDuration',
+  },
   // {
   //   header: 'Touched Location',
   //   accessorKey: 'touchedLocation',

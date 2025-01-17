@@ -70,6 +70,10 @@ const columns: MRT_ColumnDef<GeofenceTelemetryReport>[] = [
       :  <span className="text-red-800 bg-red-400 rounded-full px-2 py-1">No</span>),
   },
   {
+    header: 'Allocated Halt Duration(Mins)',
+    accessorKey: 'allocatedHaltDuration',
+  },
+  {
     header: 'Time Spent(Mins)',
     accessorKey: 'timeSpent',
   },
