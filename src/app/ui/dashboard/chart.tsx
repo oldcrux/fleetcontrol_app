@@ -76,11 +76,11 @@ export default function Chart() {
         // console.log(`session Use: `, session?.user);
         // console.log(`session status: `, session?.token.accessToken);
         // console.log(`orgId fetched from session: ${orgId}`);
-        const allVehicleCount = await getVehicleCounts(
-          session?.token.idToken,
-          orgId as string,
-          vendorId as string
-        );
+        // const allVehicleCount = await getVehicleCounts(
+        //   session?.token.idToken,
+        //   orgId as string,
+        //   vendorId as string
+        // );
         // console.log(`all vehicle count fetched - ${allVehicleCount}`);
 
         const response = await axios.get(`${url}`, {
@@ -90,12 +90,11 @@ export default function Chart() {
           // withCredentials: true,
         });
         const runningVehicles = await response.data;
-        // console.log(`chart:fetchVehicleCounts: data:`, runningVehicles);
+        console.log(`chart:fetchVehicleCounts: data:`, runningVehicles);
         if (runningVehicles) {
           // const runningVehicles = eventData;
           // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${eventData.data}`);
-          let totalGhostCount =
-            allVehicleCount - runningVehicles.totalIgnitionOnOffCount;
+          let totalGhostCount = runningVehicles.ghostVehicleCount;
           setData([
             {
               label: "Ghost",
@@ -178,7 +177,7 @@ export default function Chart() {
 
             // Customize the tooltip label based on the bar's label
             if (label === "Ghost") {
-              return `Vehicle that never sent data: ${dataValue}`;
+              return `Vehicle that has not sent data in last 24hr: ${dataValue}`;
             } else if (label === "Off") {
               return `Vehicle engine turned off: ${dataValue}`;
             } else if (label === "Idle") {
