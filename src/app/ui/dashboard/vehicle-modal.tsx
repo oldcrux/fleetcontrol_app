@@ -81,8 +81,8 @@ const VehicleModal = (label: any) => {
       // console.log(`orgId fetched from session: ${orgId}`);
       if (typeof window !== "undefined") {
         if (label.label === "Ghost") {
-          const offVehicles = await fetchGhostVehicles(session?.token.idToken, orgId as string, vendorId as string);
-          setData(offVehicles);
+          const ghostVehicles = await fetchGhostVehicles(session?.token.idToken, orgId as string, vendorId as string);
+          setData(ghostVehicles);
         } else if (label.label === "Off") {
           const offVehicles = await fetchVehiclesIgnitionOff(session?.token.idToken, orgId as string, vendorId as string);
           setData(offVehicles);
