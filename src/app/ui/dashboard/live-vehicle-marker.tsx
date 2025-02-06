@@ -19,18 +19,23 @@ import {
 } from "@vis.gl/react-google-maps";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import NavigationIcon from "@mui/icons-material/Navigation";
 import { searchVehicleByNumber } from "@/app/lib/vehicle-utils";
 import { useSession } from "next-auth/react";
 import { Vehicle } from "@/app/lib/types";
 import { Grafana } from "./grafana";
-import { off_vehicle_color, running_vehicle_color, speeding_vehicle_color } from "../util/color_picker";
-
+import {
+  off_vehicle_color,
+  running_vehicle_color,
+  speeding_vehicle_color,
+} from "../util/color_picker";
 
 type GeoVehicle = {
   key: string;
   location: google.maps.LatLngLiteral;
   ignition: number;
   speed: number;
+  headingDirectionDegree: number;
 };
 
 interface InfoWindowProps {
@@ -84,13 +89,66 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
     setOpenMarkerKey((prevKey) => (prevKey === key ? null : key)); // Toggle open/close
   };
 
+  /** */
+  function interpolatePosition(
+    oldPosition: { lat: number; lng: number },
+    newPosition: { lat: number; lng: number },
+    t: number
+  ): { lat: number; lng: number } {
+    return {
+      lat: oldPosition.lat + (newPosition.lat - oldPosition.lat) * t,
+      lng: oldPosition.lng + (newPosition.lng - oldPosition.lng) * t,
+    };
+  }
+  // State to store interpolated positions of vehicles by their keys
+  const [vehiclePositions, setVehiclePositions] = useState<{
+    [key: string]: { lat: number; lng: number };
+  }>({});
+
+  useEffect(() => {
+    const intervals = props.vehicles.map((vehicle) => {
+      const initialPosition = vehicle.location;
+
+      setVehiclePositions((prevPositions) => ({
+        ...prevPositions,
+        [vehicle.key]: initialPosition,
+      }));
+
+      let t = 0;
+      const interval = setInterval(() => {
+        if (!vehicle) return;
+
+        const oldPosition = vehiclePositions[vehicle.key] || initialPosition;
+
+        t += 0.05; // Adjust interpolation rate
+        if (t >= 1) {
+          clearInterval(interval);
+          t = 1;
+        }
+        const newPos = interpolatePosition(oldPosition, vehicle.location, t);
+        setVehiclePositions((prevPositions) => ({
+          ...prevPositions,
+          [vehicle.key]: newPos,
+        }));
+      }, 50); // Update position every 50ms for smoother transition
+
+      return interval;
+    });
+
+    return () => {
+      intervals.forEach(clearInterval);
+    };
+  }, [props.vehicles]);
+
+  /** */
+
   return (
     <>
       {props.vehicles.map((vehicle: GeoVehicle) => (
         <React.Fragment key={vehicle.key}>
           <AdvancedMarkerWithRef
             key={vehicle.key}
-            position={vehicle.location}
+            position={vehiclePositions[vehicle.key]}
             ref={(marker) => setMarkerRef(marker, vehicle.key)}
             onClick={(marker) => {
               if (marker) {
@@ -99,6 +157,7 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
             }}
           >
             <div>
+              {/* <NavigationIcon */}
               <DirectionsCarIcon
                 sx={{
                   color:
@@ -107,6 +166,14 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
                       : vehicle.speed <= 45
                       ? running_vehicle_color
                       : speeding_vehicle_color,
+                  // transform:
+                  //   vehicle.ignition === 1 && vehicle.speed > 0
+                  //     ? `rotate(${vehicle.headingDirectionDegree}deg)`
+                  //     : "none",
+                  transition:
+                    vehicle.ignition === 1 && vehicle.speed > 0
+                      ? "transform 0.3s ease-in-out"
+                      : "none",
                 }} // TODO remove speedlimit hardcoded
               />
             </div>
@@ -140,7 +207,9 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
   const { data: session, status } = useSession();
-  const orgId = session?.user?.secondaryOrgId ? session?.user?.secondaryOrgId as string : session?.user?.primaryOrgId as string;
+  const orgId = session?.user?.secondaryOrgId
+    ? (session?.user?.secondaryOrgId as string)
+    : (session?.user?.primaryOrgId as string);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -148,7 +217,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
     const fetchVehicle = async () => {
       try {
         const fetchedVehicle = await searchVehicleByNumber(
-          session?.token.idToken, 
+          session?.token.idToken,
           orgId,
           vehicleNumber
         );
@@ -265,7 +334,11 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
         </div>
         <Grafana vehicleNumber={vehicleNumber} />
       </Modal> */}
-      <Grafana show={modalIsOpen} onClose={() => setModalIsOpen(false)} vehicleNumbers={vehicleNumber} />
+      <Grafana
+        show={modalIsOpen}
+        onClose={() => setModalIsOpen(false)}
+        vehicleNumbers={vehicleNumber}
+      />
     </>
   );
   return null;

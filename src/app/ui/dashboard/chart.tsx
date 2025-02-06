@@ -90,7 +90,7 @@ export default function Chart() {
           // withCredentials: true,
         });
         const runningVehicles = await response.data;
-        console.log(`chart:fetchVehicleCounts: data:`, runningVehicles);
+        // console.log(`chart:fetchVehicleCounts: data:`, runningVehicles);
         if (runningVehicles) {
           // const runningVehicles = eventData;
           // console.log(`chart:fetchVehicleCounts: new running vehicle count=> ${eventData.data}`);

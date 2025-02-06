@@ -129,6 +129,7 @@ export default function DashboardMap({ query }: { query: string }) {
             ignition: event.ignition,
             key: event.vehicleNumber,
             speed: event.speed,
+            headingDirectionDegree: event.headingDirectionDegree,
             location: {
               lat: event.latitude,
               lng: event.longitude,
