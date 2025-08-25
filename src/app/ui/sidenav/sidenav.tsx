@@ -34,7 +34,7 @@ export default function SideNav() {
         isCollapsed ? "w-16" : "w-64"
       } flex-col px-3 py-4 transition-all duration-300 relative`}
     >
-      <Link
+      {/* <Link
         className={`hidden sm:block mb-2 h-30 items-end justify-start rounded-md bg-white p-4 ${
           isCollapsed ? "justify-center" : ""
         }`}
@@ -43,7 +43,7 @@ export default function SideNav() {
         <div className={`text-blue-600 w-full flex justify-center`}>
           {!isCollapsed && <Logo />}
         </div>
-      </Link>
+      </Link> */}
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <SideNavLinks isCollapsed={isCollapsed} />
 
