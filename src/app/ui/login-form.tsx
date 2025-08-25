@@ -56,8 +56,8 @@ export default function LoginForm() {
     <div
           className={`${montserrat.className} fixed top-2 left-2 p-1 text-xs text-gray-300 flex justify-center sm:justify-end`}
         >
-          <a href="https://oldcrux.com/" className="hover:text-blue-500">
-          {'<'} oldcrux.com
+          <a href="https://abc.com/" className="hover:text-blue-500">
+          {'<'} abc.com
           </a>
         </div>
         
@@ -82,7 +82,7 @@ export default function LoginForm() {
               fontWeight="normal"
               sx={{ fontFamily: `${montserrat.style.fontFamily} !important` }}
             >
-              OldCrux
+              abc
             </Typography>
             <Typography variant="h4" color="primary">
               Fleet Dashboard

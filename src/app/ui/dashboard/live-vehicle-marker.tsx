@@ -19,7 +19,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import NavigationIcon from "@mui/icons-material/Navigation";
+import NavigationTwoToneIcon from '@mui/icons-material/NavigationTwoTone';
 import { searchVehicleByNumber } from "@/app/lib/vehicle-utils";
 import { useSession } from "next-auth/react";
 import { Vehicle } from "@/app/lib/types";
@@ -157,8 +157,8 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
             }}
           >
             <div>
-              {/* <NavigationIcon */}
-              <DirectionsCarIcon
+              <NavigationTwoToneIcon
+              // <DirectionsCarIcon
                 sx={{
                   color:
                     vehicle.ignition === 0
@@ -166,10 +166,10 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
                       : vehicle.speed <= 45
                       ? running_vehicle_color
                       : speeding_vehicle_color,
-                  // transform:
-                  //   vehicle.ignition === 1 && vehicle.speed > 0
-                  //     ? `rotate(${vehicle.headingDirectionDegree}deg)`
-                  //     : "none",
+                  transform:
+                    vehicle.ignition === 1 && vehicle.speed > 0
+                      ? `rotate(${vehicle.headingDirectionDegree}deg)`
+                      : "none",
                   transition:
                     vehicle.ignition === 1 && vehicle.speed > 0
                       ? "transform 0.3s ease-in-out"

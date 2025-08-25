@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 
 export const metadata: Metadata = {
   title: "Fleet Control",
-  description: "OldCrux Fleet Control",
+  description: "abc Fleet Control",
 };
 
 export default async function RootLayout({
@@ -29,7 +29,7 @@ export default async function RootLayout({
         <div
           className={`${montserrat.className} fixed bottom-0 left-0 right-0 p-1 text-xs text-gray-600 flex justify-center sm:justify-end`}
         >
-          © {new Date().getFullYear()} OldCrux Pvt Ltd. All rights reserved.
+          © {new Date().getFullYear()} abc.com All rights reserved.
         </div>
       </body>
     </html>
