@@ -33,7 +33,7 @@ const checkTokenForExpiryAndLogout = () => {
       }
     };
     tokenCheck();
-    console.log("Checking Token");
+    // console.log("Checking Token");
     const interval = setInterval(tokenCheck, 60000);
 
     return () => clearInterval(interval);

@@ -15,7 +15,7 @@ export default function SideNav() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  console.log(`id_token:`, session?.token.idToken);
+  // console.log(`id_token:`, session?.token.idToken);
   const toggleSidenav = () => {
     setIsCollapsed((prev) => !prev);
   };

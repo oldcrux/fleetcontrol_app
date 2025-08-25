@@ -89,55 +89,59 @@ export const VehicleMarkers = (props: { vehicles: GeoVehicle[] }) => {
     setOpenMarkerKey((prevKey) => (prevKey === key ? null : key)); // Toggle open/close
   };
 
-  /** */
-  function interpolatePosition(
-    oldPosition: { lat: number; lng: number },
-    newPosition: { lat: number; lng: number },
-    t: number
-  ): { lat: number; lng: number } {
-    return {
-      lat: oldPosition.lat + (newPosition.lat - oldPosition.lat) * t,
-      lng: oldPosition.lng + (newPosition.lng - oldPosition.lng) * t,
-    };
-  }
   // State to store interpolated positions of vehicles by their keys
   const [vehiclePositions, setVehiclePositions] = useState<{
     [key: string]: { lat: number; lng: number };
   }>({});
 
-  useEffect(() => {
-    const intervals = props.vehicles.map((vehicle) => {
-      const initialPosition = vehicle.location;
-
-      setVehiclePositions((prevPositions) => ({
-        ...prevPositions,
-        [vehicle.key]: initialPosition,
+  //TODO markers flicker due to this animation logic. Fix later
+  function animatePosition(
+    key: string,
+    startPos: google.maps.LatLngLiteral,
+    endPos: google.maps.LatLngLiteral,
+    duration = 1000 // in ms
+  ) {
+    const startTime = performance.now();
+  
+    function step(currentTime: number) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1); // clamp 0–1
+  
+      const lat = startPos.lat + (endPos.lat - startPos.lat) * progress;
+      const lng = startPos.lng + (endPos.lng - startPos.lng) * progress;
+  
+      setVehiclePositions((prev) => ({
+        ...prev,
+        [key]: { lat, lng },
       }));
+  
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+  
+    requestAnimationFrame(step);
+  }
 
-      let t = 0;
-      const interval = setInterval(() => {
-        if (!vehicle) return;
 
-        const oldPosition = vehiclePositions[vehicle.key] || initialPosition;
-
-        t += 0.05; // Adjust interpolation rate
-        if (t >= 1) {
-          clearInterval(interval);
-          t = 1;
-        }
-        const newPos = interpolatePosition(oldPosition, vehicle.location, t);
-        setVehiclePositions((prevPositions) => ({
-          ...prevPositions,
+  useEffect(() => {
+    props.vehicles.forEach((vehicle) => {
+      const newPos = vehicle.location;
+      const prevPos = vehiclePositions[vehicle.key];
+  
+      if (!prevPos) {
+        // Initial set
+        setVehiclePositions((prev) => ({
+          ...prev,
           [vehicle.key]: newPos,
         }));
-      }, 50); // Update position every 50ms for smoother transition
-
-      return interval;
+      } else if (
+        prevPos.lat !== newPos.lat ||
+        prevPos.lng !== newPos.lng
+      ) {
+        animatePosition(vehicle.key, prevPos, newPos, 1000);
+      }
     });
-
-    return () => {
-      intervals.forEach(clearInterval);
-    };
   }, [props.vehicles]);
 
   /** */
@@ -221,7 +225,7 @@ export const InfoWindow: React.FC<InfoWindowProps> = ({
           orgId,
           vehicleNumber
         );
-        console.log(fetchedVehicle);
+        // console.log(fetchedVehicle);
         setVehicle(fetchedVehicle); // Update state with fetched vehicle
       } catch (error) {
         console.error("Error fetching vehicle:", error);
